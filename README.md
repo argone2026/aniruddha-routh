@@ -66,11 +66,70 @@ Visit `http://localhost:3000` for the portfolio and `/admin/login` for the admin
 
 ## Deployment
 
-This app is optimized for **Vercel** (free tier):
-1. Push to GitHub
-2. Import in Vercel
-3. Add environment variables
-4. For production database, switch to PostgreSQL (Supabase free tier)
+### Vercel + Turso (recommended — both free tiers)
+
+#### 1. Set up a remote database with Turso
+
+```bash
+# Install the Turso CLI
+curl -sSfL https://get.tur.so/install.sh | bash
+
+# Sign up / log in
+turso auth signup   # or: turso auth login
+
+# Create a database
+turso db create my-portfolio-db
+
+# Get the database URL
+turso db show my-portfolio-db --url
+# → libsql://<your-database>.turso.io
+
+# Create an auth token
+turso db tokens create my-portfolio-db
+# → <token>
+```
+
+#### 2. Apply database migrations
+
+```bash
+export DATABASE_URL="libsql://<your-database>.turso.io"
+export DATABASE_AUTH_TOKEN="<your-token>"
+
+npx prisma migrate deploy
+```
+
+#### 3. Deploy to Vercel
+
+1. Push your code to GitHub.
+2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo.
+3. In **Environment Variables** add:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | `libsql://<your-database>.turso.io` |
+   | `DATABASE_AUTH_TOKEN` | `<your-turso-token>` |
+   | `NEXTAUTH_SECRET` | output of `openssl rand -base64 32` |
+   | `ADMIN_EMAIL` | your admin e-mail |
+   | `ADMIN_PASSWORD` | your admin password |
+
+4. Click **Deploy**.
+5. After deployment, visit `https://<your-app>.vercel.app/api/seed` once to create the admin user.
+
+> **Tip**: Vercel auto-deploys on every push to `main`. A CI workflow (`.github/workflows/ci.yml`) runs lint and build checks on every PR.
+
+### Other platforms (Railway, Render, Fly.io, self-hosted VPS)
+
+Any Node.js 20+ host works:
+
+```bash
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm run build
+npm start
+```
+
+Set the same environment variables via your platform's dashboard or an `.env` file.
 
 ## License
 
