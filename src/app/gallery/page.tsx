@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Image as ImageIcon, ArrowLeft } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
   const photos = await prisma.photo.findMany({
     orderBy: { createdAt: "desc" },

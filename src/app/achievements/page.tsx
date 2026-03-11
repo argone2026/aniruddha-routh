@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Trophy, Star, ArrowLeft } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   trophy: Trophy,
   star: Star,

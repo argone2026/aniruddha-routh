@@ -12,6 +12,8 @@ import {
   Linkedin,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getData() {
   const [achievements, hobbies, photos] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
