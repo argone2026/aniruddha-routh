@@ -490,6 +490,18 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Interactive Zone */}
+      <section className="py-10 px-6">
+        <div className="mx-auto grid max-w-6xl items-start gap-8 md:grid-cols-2">
+          <div className="w-full md:max-w-[430px] md:justify-self-start">
+            <VisitorNoteBox />
+          </div>
+          <div className="w-full md:max-w-[430px] md:justify-self-end">
+            <ScribblePad />
+          </div>
+        </div>
+      </section>
+
       {/* Savage Thought Section */}
       <section className="pb-6 px-6">
         <div className="max-w-4xl mx-auto">
@@ -501,22 +513,6 @@ export default async function Home() {
               &ldquo;{savageThought.text}&rdquo;
             </p>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">&mdash; {savageThought.author}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Zone — Doodle Board + Visitor Note side by side */}
-      <section className="py-10 px-6">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold pl-1">Doodle Board</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 pl-1 mb-1">Got something to draw? Go wild.</p>
-            <ScribblePad />
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold pl-1">Drop A Note</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 pl-1 mb-1">Slide into my admin inbox. No cap.</p>
-            <VisitorNoteBox />
           </div>
         </div>
       </section>

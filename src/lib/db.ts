@@ -10,10 +10,23 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
+function hasExpectedDelegates(client: PrismaClient | undefined): client is PrismaClient {
+  if (!client) return false;
+
+  const candidate = client as PrismaClient & {
+    workExperience?: unknown;
+    siteConfig?: unknown;
+  };
+
+  return Boolean(candidate.workExperience && candidate.siteConfig);
+}
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma = hasExpectedDelegates(globalForPrisma.prisma)
+  ? globalForPrisma.prisma
+  : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

@@ -78,32 +78,16 @@ html.dark textarea {
   50% { background-position: 100% 50%; }
 }
 
-/* Amoeba / organic blob shape for ScribblePad */
-@keyframes amoeba-morph {
-  0%   { border-radius: 63% 37% 47% 53% / 53% 67% 33% 47%; }
-  20%  { border-radius: 40% 60% 65% 35% / 55% 40% 60% 45%; }
-  40%  { border-radius: 55% 45% 30% 70% / 35% 65% 35% 65%; }
-  60%  { border-radius: 70% 30% 52% 48% / 48% 60% 40% 52%; }
-  80%  { border-radius: 45% 55% 68% 32% / 60% 38% 62% 40%; }
-  100% { border-radius: 63% 37% 47% 53% / 53% 67% 33% 47%; }
+@keyframes note-shell-morph {
+  0%   { border-radius: 58% 42% 37% 63% / 43% 57% 43% 57%; }
+  25%  { border-radius: 39% 61% 58% 42% / 60% 44% 56% 40%; }
+  50%  { border-radius: 50% 50% 34% 66% / 38% 63% 37% 62%; }
+  75%  { border-radius: 62% 38% 48% 52% / 55% 36% 64% 45%; }
+  100% { border-radius: 58% 42% 37% 63% / 43% 57% 43% 57%; }
 }
 
-@keyframes amoeba-shell-morph {
-  0%   { border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%; }
-  25%  { border-radius: 54% 46% 63% 37% / 40% 61% 39% 60%; }
-  50%  { border-radius: 61% 39% 33% 67% / 56% 44% 56% 44%; }
-  75%  { border-radius: 43% 57% 55% 45% / 35% 63% 37% 65%; }
-  100% { border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%; }
-}
-
-.scribble-blob {
-  border-radius: 63% 37% 47% 53% / 53% 67% 33% 47%;
-  animation: amoeba-morph 10s ease-in-out infinite;
-}
-
-.scribble-shell {
-  border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%;
-  animation: amoeba-shell-morph 14s ease-in-out infinite;
+.note-shell {
+  border-radius: 58% 42% 37% 63% / 43% 57% 43% 57%;
 }
 
 .animate-gradient {
