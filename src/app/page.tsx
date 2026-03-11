@@ -335,7 +335,7 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -360,6 +360,7 @@ async function getData() {
     fetchLeetCodeUpcomingContests(),
     fetchCodeforcesUpcomingContests(),
     fetchSavageThought(),
+    prisma.siteConfig.findUnique({ where: { key: "profilePictureUrl" } }),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -389,7 +390,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -399,7 +400,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -427,9 +428,10 @@ export default async function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-24 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1 space-y-6">
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-16">
+          {/* Left — text */}
+          <div className="flex-1 space-y-6 order-2 md:order-1">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight">
               Hi, I&apos;m{" "}
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -454,24 +456,67 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <VisitorNoteBox />
-            <ScribblePad />
+
+          {/* Right — profile picture */}
+          <div className="order-1 md:order-2 flex-shrink-0 flex items-center justify-center">
+            <div className="relative">
+              {/* Outer glow */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 blur-2xl opacity-25 scale-110" />
+              {/* Gradient border ring */}
+              <div className="relative p-1 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl">
+                <div className="rounded-full overflow-hidden bg-slate-900 w-56 h-56 md:w-72 md:h-72">
+                  {profilePictureUrl ? (
+                    <Image
+                      src={profilePictureUrl}
+                      alt="Aniruddha Routh"
+                      width={288}
+                      height={288}
+                      className="w-full h-full object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-700">
+                      <span className="text-6xl md:text-7xl font-bold text-white/90 select-none">AR</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Decorative dots */}
+              <div className="absolute -top-3 -right-3 w-5 h-5 rounded-full bg-indigo-400 opacity-70" />
+              <div className="absolute -bottom-4 -left-4 w-4 h-4 rounded-full bg-purple-400 opacity-60" />
+              <div className="absolute top-8 -left-5 w-3 h-3 rounded-full bg-pink-400 opacity-50" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Savage Thought Section */}
-      <section className="pb-12 px-6">
+      <section className="pb-6 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm p-6">
             <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-300 font-semibold mb-3">
               Savage Thought Of The Day
             </p>
             <p className="text-lg md:text-xl text-slate-800 dark:text-slate-100 leading-relaxed">
-              “{savageThought.text}”
+              &ldquo;{savageThought.text}&rdquo;
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">- {savageThought.author}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">&mdash; {savageThought.author}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Zone — Doodle Board + Visitor Note side by side */}
+      <section className="py-10 px-6">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold pl-1">Doodle Board</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 pl-1 mb-1">Got something to draw? Go wild.</p>
+            <ScribblePad />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold pl-1">Drop A Note</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 pl-1 mb-1">Slide into my admin inbox. No cap.</p>
+            <VisitorNoteBox />
           </div>
         </div>
       </section>

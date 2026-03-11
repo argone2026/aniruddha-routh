@@ -36,7 +36,7 @@ export default function VisitorNoteBox() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[290px] rounded-3xl p-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-xl text-slate-100"
+      className="w-full rounded-3xl p-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-xl text-slate-100"
     >
       <h3 className="text-sm font-semibold mb-1">Drop A Savage Note</h3>
       <p className="text-xs text-slate-400 mb-3">One sharp line. No fluff. No cap.</p>

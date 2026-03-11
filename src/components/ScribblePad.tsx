@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function ScribblePad() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
   const [lineWidth, setLineWidth] = useState(3);
@@ -20,10 +21,12 @@ export default function ScribblePad() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const cssWidth = 260;
+    // Use the container's width so the canvas fills its column
+    const cssWidth = container.clientWidth || 260;
     const cssHeight = 220;
 
     canvas.width = Math.floor(cssWidth * dpr);
@@ -104,7 +107,7 @@ export default function ScribblePad() {
   }
 
   return (
-    <div className="w-[290px] rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
+    <div ref={containerRef} className="w-full rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold tracking-wide uppercase">Scribble Pad</h3>
         <button onClick={clearCanvas} className="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-md transition-colors">

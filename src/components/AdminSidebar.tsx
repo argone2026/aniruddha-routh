@@ -19,6 +19,7 @@ import {
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/profile", icon: User, label: "Profile Picture" },
   { href: "/admin/notes", icon: StickyNote, label: "Notes" },
   { href: "/admin/achievements", icon: Trophy, label: "Achievements" },
   { href: "/admin/goals", icon: Target, label: "Goals" },
