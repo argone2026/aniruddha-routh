@@ -292,16 +292,17 @@ async function getData() {
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
     prisma.workExperience.findMany({ orderBy: { createdAt: "desc" } }),
     fetch(
-      "https://api.github.com/users/argone2026/repos?sort=created&direction=asc&per_page=3",
+      "https://api.github.com/users/argone2026/repos?sort=updated&direction=desc&per_page=20",
       {
+        cache: "no-store",
         headers: {
           Accept: "application/vnd.github+json",
+          "User-Agent": "aniruddha-routh-portfolio",
         },
-        next: { revalidate: 3600 },
       }
     )
       .then((res) => (res.ok ? res.json() : []))
-      .then((repos: GitHubRepo[]) => repos.slice(0, 3))
+      .then((repos: Array<GitHubRepo & { fork?: boolean }>) => repos.filter((repo) => !repo.fork).slice(0, 3))
       .catch(() => [] as GitHubRepo[]),
     fetchLeetCodeActivity("aniruddharouth"),
     fetchGitHubActivity("argone2026"),
