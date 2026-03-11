@@ -68,11 +68,11 @@ export default async function Home() {
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="#about" className="text-slate-600 hover:text-indigo-600 transition-colors">About</Link>
-            <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
-            <Link href="#hobbies" className="text-slate-600 hover:text-indigo-600 transition-colors">Hobbies</Link>
             <Link href="#experience" className="text-slate-600 hover:text-indigo-600 transition-colors">Experience</Link>
-            <Link href="#gallery" className="text-slate-600 hover:text-indigo-600 transition-colors">Gallery</Link>
             <Link href="#projects" className="text-slate-600 hover:text-indigo-600 transition-colors">Projects</Link>
+            <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
+            <Link href="#gallery" className="text-slate-600 hover:text-indigo-600 transition-colors">Gallery</Link>
+            <Link href="#hobbies" className="text-slate-600 hover:text-indigo-600 transition-colors">Hobbies</Link>
             <Link href="#contact" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">Contact</Link>
           </div>
         </div>
@@ -123,11 +123,12 @@ export default async function Home() {
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">About Me</h2>
             <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full" />
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
             {[
+              { icon: Briefcase, title: "Experience", count: workExperience.length, label: "roles delivered", href: "#experience", color: "text-sky-500", bg: "bg-sky-50" },
+              { icon: Github, title: "Projects", count: projects.length, label: "repos on GitHub", href: "#projects", color: "text-violet-500", bg: "bg-violet-50" },
               { icon: Trophy, title: "Achievements", count: achievements.length, label: "milestones reached", href: "#achievements", color: "text-amber-500", bg: "bg-amber-50" },
               { icon: Heart, title: "Hobbies", count: hobbies.length, label: "passions pursued", href: "#hobbies", color: "text-rose-500", bg: "bg-rose-50" },
-              { icon: Briefcase, title: "Experience", count: workExperience.length, label: "roles delivered", href: "#experience", color: "text-sky-500", bg: "bg-sky-50" },
             ].map(({ icon: Icon, title, count, label, href, color, bg }) => (
               <Link key={title} href={href} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 group">
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${bg} ${color} mb-4 group-hover:scale-110 transition-transform`}>
@@ -144,81 +145,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Achievements Section */}
-      <section id="achievements" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Achievements</h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" />
-            </div>
-            <Link href="/achievements" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
-              View all <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          {achievements.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No achievements yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {achievements.map((achievement) => {
-                const Icon = ICON_MAP[achievement.icon] ?? Trophy;
-                return (
-                  <div key={achievement.id} className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300">
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 text-amber-500 mb-4">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="text-xs text-slate-400 mb-2">{achievement.date}</div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{achievement.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">{achievement.description}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Hobbies Section */}
-      <section id="hobbies" className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Hobbies &amp; Interests</h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full" />
-            </div>
-            <Link href="/hobbies" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
-              View all <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          {hobbies.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No hobbies listed yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {hobbies.map((hobby) => {
-                const Icon = ICON_MAP[hobby.icon] ?? Heart;
-                return (
-                  <div key={hobby.id} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-rose-200 transition-all duration-300 text-center group">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 mb-4 group-hover:scale-110 transition-transform">
-                      <Icon className="w-7 h-7" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{hobby.name}</h3>
-                    <p className="text-sm text-slate-500">{hobby.description}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* Work Experience Section */}
-      <section id="experience" className="py-20 px-6 bg-white">
+      <section id="experience" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -236,7 +164,7 @@ export default async function Home() {
               {workExperience.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-md hover:border-sky-200 transition-all duration-300"
+                  className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-md hover:border-sky-200 transition-all duration-300"
                 >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
                     <div>
@@ -249,45 +177,6 @@ export default async function Home() {
                     </div>
                   </div>
                   <p className="text-slate-500 leading-relaxed">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Gallery Section */}
-      <section id="gallery" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Gallery</h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full" />
-            </div>
-            <Link href="/gallery" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
-              View all <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          {photos.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No photos yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="group relative overflow-hidden rounded-2xl aspect-square bg-slate-200">
-                  <Image
-                    src={photo.url}
-                    alt={photo.alt ?? photo.caption ?? "Gallery photo"}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {photo.caption && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                      <p className="text-white text-sm font-medium">{photo.caption}</p>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -338,6 +227,118 @@ export default async function Home() {
                   </div>
                 </a>
               ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Achievements Section */}
+      <section id="achievements" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Achievements</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" />
+            </div>
+            <Link href="/achievements" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+              View all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          {achievements.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No achievements yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {achievements.map((achievement) => {
+                const Icon = ICON_MAP[achievement.icon] ?? Trophy;
+                return (
+                  <div key={achievement.id} className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 text-amber-500 mb-4">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="text-xs text-slate-400 mb-2">{achievement.date}</div>
+                    <h3 className="font-semibold text-slate-900 mb-2">{achievement.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{achievement.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Gallery</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full" />
+            </div>
+            <Link href="/gallery" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+              View all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          {photos.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No photos yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {photos.map((photo) => (
+                <div key={photo.id} className="group relative overflow-hidden rounded-2xl aspect-square bg-slate-200">
+                  <Image
+                    src={photo.url}
+                    alt={photo.alt ?? photo.caption ?? "Gallery photo"}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {photo.caption && (
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                      <p className="text-white text-sm font-medium">{photo.caption}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Hobbies Section */}
+      <section id="hobbies" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Hobbies &amp; Interests</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full" />
+            </div>
+            <Link href="/hobbies" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+              View all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          {hobbies.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No hobbies listed yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {hobbies.map((hobby) => {
+                const Icon = ICON_MAP[hobby.icon] ?? Heart;
+                return (
+                  <div key={hobby.id} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-rose-200 transition-all duration-300 text-center group">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 mb-4 group-hover:scale-110 transition-transform">
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 mb-2">{hobby.name}</h3>
+                    <p className="text-sm text-slate-500">{hobby.description}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
