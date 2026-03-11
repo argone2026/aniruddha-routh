@@ -232,13 +232,13 @@ export default async function Home() {
           <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full mb-8" />
           <p className="text-slate-600 mb-8">I&apos;d love to connect! Feel free to reach out via any of the platforms below.</p>
           <div className="flex justify-center gap-4 flex-wrap">
-            <a href="mailto:hello@example.com" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors">
+            <a href="mailto:bat.coder.2024@gmail.com" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors">
               <Mail className="w-4 h-4" /> Email Me
             </a>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+            <a href="https://github.com/argone2026" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-colors">
               <Github className="w-4 h-4" /> GitHub
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+            <a href="https://www.linkedin.com/in/aniruddha-routh/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-colors">
               <Linkedin className="w-4 h-4" /> LinkedIn
             </a>
           </div>
@@ -249,7 +249,31 @@ export default async function Home() {
       <footer className="py-8 px-6 border-t border-slate-200 bg-slate-50">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Aniruddha Routh. All rights reserved.</p>
-          <Link href="/admin/login" className="text-slate-400 hover:text-slate-600 text-xs transition-colors">Admin</Link>
+          <div className="flex items-center gap-4 text-xs">
+            <a
+              href="mailto:bat.coder.2024@gmail.com"
+              className="text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              Email
+            </a>
+            <a
+              href="https://github.com/argone2026"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/aniruddha-routh/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              LinkedIn
+            </a>
+            <Link href="/admin/login" className="text-slate-400 hover:text-slate-600 transition-colors">Admin</Link>
+          </div>
         </div>
       </footer>
     </div>
