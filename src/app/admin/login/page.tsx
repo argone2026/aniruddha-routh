@@ -123,11 +123,7 @@ export default function LoginPage() {
           </button>
 
           <p className="text-center text-xs text-slate-400 pt-2">
-            Default credentials: admin@example.com / admin123
-            <br />
-            <span className="text-red-400">
-              (Visit /api/seed first to create the admin account)
-            </span>
+            Use your configured admin credentials to sign in.
           </p>
         </form>
       </div>
