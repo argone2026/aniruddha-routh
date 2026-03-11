@@ -36,41 +36,42 @@ export default function VisitorNoteBox() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[290px] rounded-3xl p-4 bg-white border border-slate-200 shadow-lg"
+      className="w-[290px] rounded-3xl p-4 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-xl text-slate-100"
     >
-      <h3 className="text-sm font-semibold text-slate-900 mb-3">Drop Me A Note</h3>
+      <h3 className="text-sm font-semibold mb-1">Drop A Savage Note</h3>
+      <p className="text-xs text-slate-400 mb-3">One sharp line. No fluff. No cap.</p>
 
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Your name"
+        placeholder="Name / Alias"
         maxLength={50}
-        className="w-full mb-2 px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full mb-2 px-3 py-2 rounded-lg border border-slate-600 bg-slate-900 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
       />
 
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Write something nice..."
+        placeholder="Drop your hottest take. Roast me, challenge me, or leave a wild idea..."
         maxLength={500}
         rows={3}
-        className="w-full mb-3 px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full mb-3 px-3 py-2 rounded-lg border border-slate-600 bg-slate-900 text-sm text-slate-100 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
       />
 
       <button
         type="submit"
         disabled={submitting || !name.trim() || !note.trim()}
-        className="w-full py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+        className="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
       >
-        {submitting ? "Sending..." : "Send"}
+        {submitting ? "Sending..." : "Send The Heat"}
       </button>
 
       {status === "ok" && (
-        <p className="mt-2 text-xs text-emerald-600">Sent. I will read this in admin inbox.</p>
+        <p className="mt-2 text-xs text-emerald-400">Received. It landed in my admin inbox.</p>
       )}
       {status === "error" && (
-        <p className="mt-2 text-xs text-red-500">Could not send now. Please try again.</p>
+        <p className="mt-2 text-xs text-red-400">Network folded. Try again in a sec.</p>
       )}
     </form>
   );

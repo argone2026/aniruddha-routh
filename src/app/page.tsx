@@ -190,31 +190,42 @@ function getHeatCellClass(level: HeatmapCell["level"]) {
 
 async function fetchSavageThought(): Promise<SavageThought> {
   const fallbackThoughts: SavageThought[] = [
-    { text: "Comfort is expensive. If you can afford it, you stop growing.", author: "Unknown" },
-    { text: "Your excuses are loud. Your results are quiet.", author: "Unknown" },
-    { text: "Discipline hurts less than regret.", author: "Unknown" },
+    { text: "If it is always easy, you are probably repeating, not evolving.", author: "Daily Savage" },
+    { text: "Your comfort zone is not your home address. Move.", author: "Daily Savage" },
+    { text: "Locked in beats lucky every single time.", author: "Daily Savage" },
+    { text: "Everybody wants the glow up, nobody wants the grind up.", author: "Daily Savage" },
+    { text: "Stop saying soon. Either ship it or shelve it.", author: "Daily Savage" },
+    { text: "Your future self is watching. Do not embarrass them.", author: "Daily Savage" },
+    { text: "No more lore. Build in silence.", author: "Daily Savage" },
   ];
 
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const daySeed = Number(dayKey.replaceAll("-", ""));
+
+  function pickDaily<T>(items: T[]): T {
+    return items[daySeed % items.length];
+  }
+
   try {
-    const res = await fetch("https://zenquotes.io/api/random", {
-      cache: "no-store",
+    const res = await fetch("https://zenquotes.io/api/today", {
+      next: { revalidate: 86400 },
     });
     if (!res.ok) {
-      return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+      return pickDaily(fallbackThoughts);
     }
 
     const data = (await res.json()) as Array<{ q?: string; a?: string }>;
     const first = data?.[0];
     if (!first?.q) {
-      return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+      return pickDaily(fallbackThoughts);
     }
 
     return {
-      text: first.q,
+      text: `${first.q} Stay locked in.`,
       author: first.a ?? "Unknown",
     };
   } catch {
-    return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+    return pickDaily(fallbackThoughts);
   }
 }
 

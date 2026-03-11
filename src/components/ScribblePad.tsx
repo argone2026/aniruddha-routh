@@ -6,6 +6,17 @@ export default function ScribblePad() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
   const [lineWidth, setLineWidth] = useState(3);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncTheme = () => setIsDark(root.classList.contains("dark"));
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,10 +40,10 @@ export default function ScribblePad() {
     ctx.strokeStyle = "#f8fafc";
     ctx.lineWidth = lineWidth;
 
-    // Fill subtle translucent board background once.
-    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    // Keep background subtle, especially in dark mode.
+    ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
     ctx.fillRect(0, 0, cssWidth, cssHeight);
-  }, [lineWidth]);
+  }, [lineWidth, isDark]);
 
   function getPoint(event: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
@@ -88,25 +99,22 @@ export default function ScribblePad() {
     const cssWidth = parseFloat(canvas.style.width || "260");
     const cssHeight = parseFloat(canvas.style.height || "220");
     ctx.clearRect(0, 0, cssWidth, cssHeight);
-    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
     ctx.fillRect(0, 0, cssWidth, cssHeight);
   }
 
   return (
-    <div className="w-[290px] rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 text-white">
+    <div className="w-[290px] rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold tracking-wide uppercase">Scribble Pad</h3>
-        <button
-          onClick={clearCanvas}
-          className="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-md transition-colors"
-        >
+        <button onClick={clearCanvas} className="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-md transition-colors">
           Clear
         </button>
       </div>
 
       <canvas
         ref={canvasRef}
-        className="rounded-xl border border-white/20 touch-none cursor-crosshair"
+        className="rounded-xl border border-white/15 touch-none cursor-crosshair"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -120,7 +128,7 @@ export default function ScribblePad() {
             key={size}
             onClick={() => setLineWidth(size)}
             className={`px-2 py-1 rounded-md transition-colors ${
-              lineWidth === size ? "bg-white/35" : "bg-white/20 hover:bg-white/30"
+              lineWidth === size ? "bg-white/30" : "bg-white/15 hover:bg-white/25"
             }`}
           >
             {size}px
