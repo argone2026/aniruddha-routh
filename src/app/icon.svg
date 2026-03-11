@@ -10,4 +10,5 @@
   <path d="M23 35H33" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" />
   <path d="M41 20V44" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" />
   <path d="M41 20H49C52.314 20 55 22.686 55 26C55 29.314 52.314 32 49 32H41" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M49 32L55 44" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

@@ -49,6 +49,11 @@ type UpcomingContest = {
   url: string;
 };
 
+type SavageThought = {
+  text: string;
+  author: string;
+};
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function isoDay(date: Date) {
@@ -183,6 +188,36 @@ function getHeatCellClass(level: HeatmapCell["level"]) {
   }
 }
 
+async function fetchSavageThought(): Promise<SavageThought> {
+  const fallbackThoughts: SavageThought[] = [
+    { text: "Comfort is expensive. If you can afford it, you stop growing.", author: "Unknown" },
+    { text: "Your excuses are loud. Your results are quiet.", author: "Unknown" },
+    { text: "Discipline hurts less than regret.", author: "Unknown" },
+  ];
+
+  try {
+    const res = await fetch("https://zenquotes.io/api/random", {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+    }
+
+    const data = (await res.json()) as Array<{ q?: string; a?: string }>;
+    const first = data?.[0];
+    if (!first?.q) {
+      return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+    }
+
+    return {
+      text: first.q,
+      author: first.a ?? "Unknown",
+    };
+  } catch {
+    return fallbackThoughts[Math.floor(Math.random() * fallbackThoughts.length)];
+  }
+}
+
 function getContestWindow() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
@@ -287,7 +322,7 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -311,6 +346,7 @@ async function getData() {
     fetchCodeforcesActivity("argone.exe"),
     fetchLeetCodeUpcomingContests(),
     fetchCodeforcesUpcomingContests(),
+    fetchSavageThought(),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -340,7 +376,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -350,7 +386,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -408,6 +444,21 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <VisitorNoteBox />
             <ScribblePad />
+          </div>
+        </div>
+      </section>
+
+      {/* Savage Thought Section */}
+      <section className="pb-12 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm p-6">
+            <p className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-300 font-semibold mb-3">
+              Savage Thought Of The Day
+            </p>
+            <p className="text-lg md:text-xl text-slate-800 dark:text-slate-100 leading-relaxed">
+              “{savageThought.text}”
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">- {savageThought.author}</p>
           </div>
         </div>
       </section>
