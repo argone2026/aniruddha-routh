@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import HeroMiniGame from "@/components/HeroMiniGame";
+import ScribblePad from "@/components/ScribblePad";
 import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 import Link from "next/link";
 import Image from "next/image";
@@ -406,7 +406,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <HeroMiniGame />
+          <ScribblePad />
         </div>
       </section>
 
