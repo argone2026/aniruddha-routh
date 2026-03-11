@@ -88,9 +88,22 @@ html.dark textarea {
   100% { border-radius: 63% 37% 47% 53% / 53% 67% 33% 47%; }
 }
 
+@keyframes amoeba-shell-morph {
+  0%   { border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%; }
+  25%  { border-radius: 54% 46% 63% 37% / 40% 61% 39% 60%; }
+  50%  { border-radius: 61% 39% 33% 67% / 56% 44% 56% 44%; }
+  75%  { border-radius: 43% 57% 55% 45% / 35% 63% 37% 65%; }
+  100% { border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%; }
+}
+
 .scribble-blob {
   border-radius: 63% 37% 47% 53% / 53% 67% 33% 47%;
   animation: amoeba-morph 10s ease-in-out infinite;
+}
+
+.scribble-shell {
+  border-radius: 34% 66% 42% 58% / 59% 41% 59% 41%;
+  animation: amoeba-shell-morph 14s ease-in-out infinite;
 }
 
 .animate-gradient {

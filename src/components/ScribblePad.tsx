@@ -108,12 +108,12 @@ export default function ScribblePad() {
   }
 
   return (
-    <div className="w-full rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
-      <div className="flex items-center justify-between mb-3">
+    <div className="scribble-shell w-full overflow-hidden bg-gradient-to-br from-indigo-500 via-violet-600 to-fuchsia-600 px-5 py-5 text-white shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold tracking-wide uppercase">Scribble Pad</h3>
         <button
           onClick={clearCanvas}
-          className="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-md transition-colors"
+          className="rounded-full bg-white/15 px-3 py-1.5 text-xs transition-colors hover:bg-white/25"
         >
           Clear
         </button>
@@ -122,7 +122,7 @@ export default function ScribblePad() {
       {/* Amoeba-shaped drawing area — border-radius morphs via CSS animation */}
       <div
         ref={blobRef}
-        className="scribble-blob w-full overflow-hidden border border-white/20"
+        className="scribble-blob w-full overflow-hidden border border-white/20 bg-white/5"
         style={{ height: "210px" }}
       >
         <canvas
@@ -135,13 +135,13 @@ export default function ScribblePad() {
         />
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs">
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
         <span className="text-indigo-100">Brush</span>
         {[2, 3, 5].map((size) => (
           <button
             key={size}
             onClick={() => setLineWidth(size)}
-            className={`px-2 py-1 rounded-md transition-colors ${
+            className={`rounded-full px-3 py-1.5 transition-colors ${
               lineWidth === size ? "bg-white/30" : "bg-white/15 hover:bg-white/25"
             }`}
           >
