@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
+import { put } from "@vercel/blob";
 import path from "path";
 
 const MIME_TO_EXT: Record<string, string> = {
@@ -49,9 +49,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
   // Use the MIME-derived extension to prevent double-extension attacks
   const ext = MIME_TO_EXT[file.type];
   // Sanitize only the base name (strip extension from original name, then sanitize)
@@ -59,22 +56,15 @@ export async function POST(req: NextRequest) {
   const safeBaseName = originalBase.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
   const uniqueName = `${Date.now()}-${safeBaseName}${ext}`;
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-  // Ensure upload directory exists
-  await mkdir(uploadDir, { recursive: true });
-
-  // Resolve file path and verify it stays within uploadDir (prevent path traversal)
-  const filePath = path.resolve(uploadDir, uniqueName);
-  if (!filePath.startsWith(uploadDir + path.sep) && filePath !== uploadDir) {
-    return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
-  }
-
-  await writeFile(filePath, buffer);
+  // Upload to Vercel Blob (works on Vercel serverless; no local disk write)
+  const blob = await put(uniqueName, file, {
+    access: "public",
+    contentType: file.type,
+  });
 
   const photo = await prisma.photo.create({
     data: {
-      url: `/uploads/${uniqueName}`,
+      url: blob.url,
       caption: caption ?? null,
       alt: alt ?? null,
     },

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { unlink } from "fs/promises";
-import path from "path";
+import { del } from "@vercel/blob";
 
 export async function DELETE(
   _req: NextRequest,
@@ -19,12 +18,11 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Delete file from disk
+  // Delete from Vercel Blob
   try {
-    const filePath = path.join(process.cwd(), "public", photo.url);
-    await unlink(filePath);
+    await del(photo.url);
   } catch {
-    // File might not exist, continue
+    // Blob might not exist, continue
   }
 
   await prisma.photo.delete({ where: { id } });
