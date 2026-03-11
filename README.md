@@ -1,7 +1,7 @@
 # Aniruddha Routh — Personal Portfolio
 
 A modern personal portfolio website with an admin dashboard built with Next.js 16, TypeScript, Tailwind CSS, and SQLite.
-
+https://aniruddha-routh-kuli.vercel.app/
 ## Features
 
 ### Public Portfolio
