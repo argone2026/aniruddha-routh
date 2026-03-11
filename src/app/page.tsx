@@ -38,6 +38,14 @@ type CodingProfile = {
   cells: HeatmapCell[];
 };
 
+type UpcomingContest = {
+  platform: "LeetCode" | "Codeforces";
+  name: string;
+  startTimeSeconds: number;
+  durationSeconds: number;
+  url: string;
+};
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function isoDay(date: Date) {
@@ -172,8 +180,111 @@ function getHeatCellClass(level: HeatmapCell["level"]) {
   }
 }
 
+function getContestWindow() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  // Include today + next 5 days => [start, start + 6 days)
+  const end = new Date(start.getTime() + DAY_MS * 6);
+  return { startMs: start.getTime(), endMs: end.getTime() };
+}
+
+async function fetchLeetCodeUpcomingContests(): Promise<UpcomingContest[]> {
+  try {
+    const query = `query {
+  allContests {
+    title
+    titleSlug
+    startTime
+    duration
+  }
+}`;
+
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return [];
+
+    const json = (await res.json()) as {
+      data?: {
+        allContests?: Array<{
+          title?: string;
+          titleSlug?: string;
+          startTime?: number | string;
+          duration?: number | string;
+        }>;
+      };
+    };
+
+    const allContests = json.data?.allContests ?? [];
+    const { startMs, endMs } = getContestWindow();
+
+    return allContests
+      .map((contest) => {
+        const startTimeSeconds = Number(contest.startTime ?? 0);
+        const durationSeconds = Number(contest.duration ?? 0);
+        return {
+          platform: "LeetCode" as const,
+          name: contest.title ?? "LeetCode Contest",
+          startTimeSeconds,
+          durationSeconds,
+          url: `https://leetcode.com/contest/${contest.titleSlug ?? ""}`,
+        };
+      })
+      .filter((contest) => {
+        const startMsValue = contest.startTimeSeconds * 1000;
+        return contest.startTimeSeconds > 0 && startMsValue >= startMs && startMsValue < endMs;
+      });
+  } catch {
+    return [];
+  }
+}
+
+async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
+  try {
+    const res = await fetch("https://codeforces.com/api/contest.list?gym=false", {
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return [];
+
+    const json = (await res.json()) as {
+      status?: string;
+      result?: Array<{
+        id?: number;
+        name?: string;
+        phase?: string;
+        startTimeSeconds?: number;
+        durationSeconds?: number;
+      }>;
+    };
+    if (json.status !== "OK" || !json.result) return [];
+
+    const { startMs, endMs } = getContestWindow();
+
+    return json.result
+      .filter((contest) => contest.phase === "BEFORE")
+      .map((contest) => ({
+        platform: "Codeforces" as const,
+        name: contest.name ?? "Codeforces Contest",
+        startTimeSeconds: contest.startTimeSeconds ?? 0,
+        durationSeconds: contest.durationSeconds ?? 0,
+        url: `https://codeforces.com/contest/${contest.id ?? ""}`,
+      }))
+      .filter((contest) => {
+        const startMsValue = contest.startTimeSeconds * 1000;
+        return contest.startTimeSeconds > 0 && startMsValue >= startMs && startMsValue < endMs;
+      });
+  } catch {
+    return [];
+  }
+}
+
 async function getData() {
-  const [achievements, hobbies, photos, workExperience, projects, leetcodeActivity, githubActivity, codeforcesActivity] = await Promise.all([
+  const [achievements, hobbies, photos, workExperience, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -193,6 +304,8 @@ async function getData() {
     fetchLeetCodeActivity("aniruddharouth"),
     fetchGitHubActivity("argone2026"),
     fetchCodeforcesActivity("argone.exe"),
+    fetchLeetCodeUpcomingContests(),
+    fetchCodeforcesUpcomingContests(),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -216,7 +329,11 @@ async function getData() {
     },
   ];
 
-  return { achievements, hobbies, photos, workExperience, projects, codingProfiles };
+  const upcomingContests = [...leetCodeUpcoming, ...codeforcesUpcoming]
+    .sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
+    .slice(0, 10);
+
+  return { achievements, hobbies, photos, workExperience, projects, codingProfiles, upcomingContests };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -226,7 +343,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, projects, codingProfiles } = await getData();
+  const { achievements, hobbies, photos, workExperience, projects, codingProfiles, upcomingContests } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -244,6 +361,7 @@ export default async function Home() {
             <Link href="#coding" className="text-slate-600 hover:text-indigo-600 transition-colors">Coding</Link>
             <Link href="#experience" className="text-slate-600 hover:text-indigo-600 transition-colors">Experience</Link>
             <Link href="#projects" className="text-slate-600 hover:text-indigo-600 transition-colors">Projects</Link>
+            <Link href="#contests" className="text-slate-600 hover:text-indigo-600 transition-colors">Contests</Link>
             <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
             <Link href="#gallery" className="text-slate-600 hover:text-indigo-600 transition-colors">Gallery</Link>
             <Link href="#hobbies" className="text-slate-600 hover:text-indigo-600 transition-colors">Hobbies</Link>
@@ -452,6 +570,55 @@ export default async function Home() {
               </a>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Upcoming Contests Section */}
+      <section id="contests" className="pb-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Upcoming Contests</h3>
+              <p className="text-sm text-slate-500">LeetCode and Codeforces contests for today and the next 5 days.</p>
+            </div>
+          </div>
+
+          {upcomingContests.length === 0 ? (
+            <div className="bg-white border border-slate-100 rounded-2xl p-6 text-slate-500 text-sm">
+              No scheduled contests found in the current 6-day window.
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {upcomingContests.map((contest) => (
+                <a
+                  key={`${contest.platform}-${contest.startTimeSeconds}-${contest.name}`}
+                  href={contest.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border border-slate-100 rounded-2xl p-4 hover:border-indigo-200 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${contest.platform === "LeetCode" ? "bg-yellow-50 text-yellow-700" : "bg-blue-50 text-blue-700"}`}>
+                      {contest.platform}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {Math.round(contest.durationSeconds / 3600)}h
+                    </span>
+                  </div>
+                  <h4 className="font-semibold text-slate-900 line-clamp-2 mb-2">{contest.name}</h4>
+                  <p className="text-sm text-slate-500">
+                    {new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
