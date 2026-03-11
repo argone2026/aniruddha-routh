@@ -378,10 +378,6 @@ export default async function Home() {
       <section className="pt-32 pb-24 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1 space-y-6">
-            <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium">
-              <Star className="w-4 h-4" />
-              Welcome to my portfolio
-            </div>
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight">
               Hi, I&apos;m{" "}
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -398,8 +394,8 @@ export default async function Home() {
               When I&apos;m not writing code, I&apos;m lifting heavy, studying systems deeply, or building the next version of myself.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="#achievements" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors font-medium">
-                View Achievements <ArrowRight className="w-4 h-4" />
+              <Link href="#projects" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors font-medium">
+                View Projects <ArrowRight className="w-4 h-4" />
               </Link>
               <Link href="#contact" className="inline-flex items-center gap-2 border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-colors font-medium">
                 Get in Touch
