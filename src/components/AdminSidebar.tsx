@@ -9,6 +9,7 @@ import {
   Trophy,
   Heart,
   Image,
+  Briefcase,
   LogOut,
   ExternalLink,
   User,
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/notes", icon: StickyNote, label: "Notes" },
   { href: "/admin/achievements", icon: Trophy, label: "Achievements" },
   { href: "/admin/hobbies", icon: Heart, label: "Hobbies" },
+  { href: "/admin/work-experience", icon: Briefcase, label: "Work Experience" },
   { href: "/admin/gallery", icon: Image, label: "Gallery" },
 ];
 

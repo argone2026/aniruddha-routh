@@ -5,6 +5,7 @@ import {
   Trophy,
   Heart,
   Image as ImageIcon,
+  Briefcase,
   ArrowRight,
   Star,
   Mail,
@@ -24,10 +25,11 @@ type GitHubRepo = {
 };
 
 async function getData() {
-  const [achievements, hobbies, photos, projects] = await Promise.all([
+  const [achievements, hobbies, photos, workExperience, projects] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
+    prisma.workExperience.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
     fetch(
       "https://api.github.com/users/argone2026/repos?sort=created&direction=asc&per_page=3",
       {
@@ -41,7 +43,7 @@ async function getData() {
       .then((repos: GitHubRepo[]) => repos.slice(0, 3))
       .catch(() => [] as GitHubRepo[]),
   ]);
-  return { achievements, hobbies, photos, projects };
+  return { achievements, hobbies, photos, workExperience, projects };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -51,7 +53,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, projects } = await getData();
+  const { achievements, hobbies, photos, workExperience, projects } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -68,6 +70,7 @@ export default async function Home() {
             <Link href="#about" className="text-slate-600 hover:text-indigo-600 transition-colors">About</Link>
             <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
             <Link href="#hobbies" className="text-slate-600 hover:text-indigo-600 transition-colors">Hobbies</Link>
+            <Link href="#experience" className="text-slate-600 hover:text-indigo-600 transition-colors">Experience</Link>
             <Link href="#gallery" className="text-slate-600 hover:text-indigo-600 transition-colors">Gallery</Link>
             <Link href="#projects" className="text-slate-600 hover:text-indigo-600 transition-colors">Projects</Link>
             <Link href="#contact" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">Contact</Link>
@@ -124,7 +127,7 @@ export default async function Home() {
             {[
               { icon: Trophy, title: "Achievements", count: achievements.length, label: "milestones reached", href: "#achievements", color: "text-amber-500", bg: "bg-amber-50" },
               { icon: Heart, title: "Hobbies", count: hobbies.length, label: "passions pursued", href: "#hobbies", color: "text-rose-500", bg: "bg-rose-50" },
-              { icon: ImageIcon, title: "Photos", count: photos.length, label: "moments captured", href: "#gallery", color: "text-indigo-500", bg: "bg-indigo-50" },
+              { icon: Briefcase, title: "Experience", count: workExperience.length, label: "roles delivered", href: "#experience", color: "text-sky-500", bg: "bg-sky-50" },
             ].map(({ icon: Icon, title, count, label, href, color, bg }) => (
               <Link key={title} href={href} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 group">
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${bg} ${color} mb-4 group-hover:scale-110 transition-transform`}>
@@ -209,6 +212,45 @@ export default async function Home() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Work Experience Section */}
+      <section id="experience" className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Work Experience</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full" />
+            </div>
+          </div>
+          {workExperience.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No work experience added yet. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {workExperience.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-md hover:border-sky-200 transition-all duration-300"
+                >
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
+                    <div>
+                      <h3 className="text-xl font-semibold text-slate-900">{item.role}</h3>
+                      <p className="text-slate-600 font-medium mt-1">{item.company}</p>
+                    </div>
+                    <div className="text-sm text-slate-400 md:text-right">
+                      <div>{item.period}</div>
+                      {item.location && <div>{item.location}</div>}
+                    </div>
+                  </div>
+                  <p className="text-slate-500 leading-relaxed">{item.description}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
