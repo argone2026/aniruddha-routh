@@ -8,19 +8,21 @@ import {
   Heart,
   Image,
   Briefcase,
+  Mailbox,
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
-  const [notesCount, achievementsCount, goalsCount, hobbiesCount, workCount, photosCount] =
+  const [notesCount, achievementsCount, goalsCount, hobbiesCount, workCount, inboxCount, photosCount] =
     await Promise.all([
       prisma.note.count(),
       prisma.achievement.count(),
       prisma.goal.count(),
       prisma.hobby.count(),
       prisma.workExperience.count(),
+      prisma.visitorMessage.count(),
       prisma.photo.count(),
     ]);
 
@@ -35,6 +37,7 @@ export default async function DashboardPage() {
     { label: "Goals", count: goalsCount, icon: Target, color: "text-violet-500", bg: "bg-violet-50", href: "/admin/goals" },
     { label: "Hobbies", count: hobbiesCount, icon: Heart, color: "text-rose-500", bg: "bg-rose-50", href: "/admin/hobbies" },
     { label: "Work", count: workCount, icon: Briefcase, color: "text-sky-500", bg: "bg-sky-50", href: "/admin/work-experience" },
+    { label: "Inbox", count: inboxCount, icon: Mailbox, color: "text-emerald-500", bg: "bg-emerald-50", href: "/admin/visitor-messages" },
     { label: "Photos", count: photosCount, icon: Image, color: "text-indigo-500", bg: "bg-indigo-50", href: "/admin/gallery" },
   ];
 
@@ -50,7 +53,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-4 mb-8">
         {stats.map(({ label, count, icon: Icon, color, bg, href }) => (
           <Link
             key={label}

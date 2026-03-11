@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import ScribblePad from "@/components/ScribblePad";
+import VisitorNoteBox from "@/components/VisitorNoteBox";
 import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 import Link from "next/link";
 import Image from "next/image";
@@ -404,7 +405,10 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <ScribblePad />
+          <div className="flex flex-col gap-4">
+            <VisitorNoteBox />
+            <ScribblePad />
+          </div>
         </div>
       </section>
 

@@ -11,6 +11,7 @@ import {
   Heart,
   Image,
   Briefcase,
+  Mailbox,
   LogOut,
   ExternalLink,
   User,
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/goals", icon: Target, label: "Goals" },
   { href: "/admin/hobbies", icon: Heart, label: "Hobbies" },
   { href: "/admin/work-experience", icon: Briefcase, label: "Work Experience" },
+  { href: "/admin/visitor-messages", icon: Mailbox, label: "Visitor Inbox" },
   { href: "/admin/gallery", icon: Image, label: "Gallery" },
 ];
 
