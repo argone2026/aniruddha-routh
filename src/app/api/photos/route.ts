@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { put } from "@vercel/blob";
 import path from "path";
 
+export const runtime = "nodejs";
+
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -22,6 +24,13 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      { error: "Upload storage is not configured (missing BLOB_READ_WRITE_TOKEN)." },
+      { status: 500 }
+    );
   }
 
   const formData = await req.formData();
@@ -56,19 +65,31 @@ export async function POST(req: NextRequest) {
   const safeBaseName = originalBase.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
   const uniqueName = `${Date.now()}-${safeBaseName}${ext}`;
 
-  // Upload to Vercel Blob (works on Vercel serverless; no local disk write)
-  const blob = await put(uniqueName, file, {
-    access: "public",
-    contentType: file.type,
-  });
+  try {
+    // Upload to Vercel Blob (works on Vercel serverless; no local disk write)
+    const blob = await put(uniqueName, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
-  const photo = await prisma.photo.create({
-    data: {
-      url: blob.url,
-      caption: caption ?? null,
-      alt: alt ?? null,
-    },
-  });
+    const photo = await prisma.photo.create({
+      data: {
+        url: blob.url,
+        caption: caption ?? null,
+        alt: alt ?? null,
+      },
+    });
 
-  return NextResponse.json(photo, { status: 201 });
+    return NextResponse.json(photo, { status: 201 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown upload error";
+    console.error("Photo upload failed", error);
+    return NextResponse.json(
+      {
+        error: "Photo upload failed",
+        details: process.env.NODE_ENV === "development" ? message : undefined,
+      },
+      { status: 500 }
+    );
+  }
 }
