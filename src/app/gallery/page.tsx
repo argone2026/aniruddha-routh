@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
+import GalleryGrid from "@/components/GalleryGrid";
 import { Image as ImageIcon, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -28,28 +28,14 @@ export default async function GalleryPage() {
             <p className="text-xl">No photos yet.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="group relative overflow-hidden rounded-2xl aspect-square bg-slate-200"
-              >
-                <Image
-                  src={photo.url}
-                  alt={photo.alt ?? photo.caption ?? "Gallery photo"}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {photo.caption && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                    <p className="text-white text-sm font-medium">
-                      {photo.caption}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <GalleryGrid
+            photos={photos.map((photo) => ({
+              id: photo.id,
+              url: photo.url,
+              alt: photo.alt,
+              caption: photo.caption,
+            }))}
+          />
         )}
       </div>
     </div>

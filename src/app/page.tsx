@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import ScribblePad from "@/components/ScribblePad";
 import VisitorNoteBox from "@/components/VisitorNoteBox";
+import GalleryGrid from "@/components/GalleryGrid";
+import HobbyCards from "@/components/HobbyCards";
 import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 import Link from "next/link";
 import Image from "next/image";
@@ -744,23 +746,15 @@ export default async function Home() {
               <p>No photos yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="group relative overflow-hidden rounded-2xl aspect-square bg-slate-200">
-                  <Image
-                    src={photo.url}
-                    alt={photo.alt ?? photo.caption ?? "Gallery photo"}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {photo.caption && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                      <p className="text-white text-sm font-medium">{photo.caption}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              compact
+              photos={photos.map((photo) => ({
+                id: photo.id,
+                url: photo.url,
+                alt: photo.alt,
+                caption: photo.caption,
+              }))}
+            />
           )}
         </div>
       </section>
@@ -783,31 +777,14 @@ export default async function Home() {
               <p>No hobbies listed yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {hobbies.map((hobby) => {
-                const Icon = ICON_MAP[hobby.icon] ?? Heart;
-                return (
-                  <div key={hobby.id} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-rose-200 transition-all duration-300 text-center group">
-                    {hobby.imageUrl && (
-                      <div className="mb-4 rounded-xl overflow-hidden border border-slate-100">
-                        <Image
-                          src={hobby.imageUrl}
-                          alt={hobby.name}
-                          width={320}
-                          height={180}
-                          className="w-full h-28 object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 mb-4 group-hover:scale-110 transition-transform">
-                      <Icon className="w-7 h-7" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{hobby.name}</h3>
-                    <p className="text-sm text-slate-500">{hobby.description}</p>
-                  </div>
-                );
-              })}
-            </div>
+            <HobbyCards
+              hobbies={hobbies.map((hobby) => ({
+                id: hobby.id,
+                name: hobby.name,
+                description: hobby.description,
+                imageUrl: hobby.imageUrl,
+              }))}
+            />
           )}
         </div>
       </section>

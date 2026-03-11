@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
+import HobbyCards from "@/components/HobbyCards";
 import { Heart, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -30,37 +30,14 @@ export default async function HobbiesPage() {
             <p className="text-xl">No hobbies listed yet.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-6">
-            {hobbies.map((hobby) => (
-              <div
-                key={hobby.id}
-                className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-md hover:border-rose-200 transition-all duration-300 flex gap-4"
-              >
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
-                  <Heart className="w-6 h-6" />
-                </div>
-                <div>
-                  {hobby.imageUrl && (
-                    <div className="mb-3">
-                      <Image
-                        src={hobby.imageUrl}
-                        alt={hobby.name}
-                        width={220}
-                        height={120}
-                        className="rounded-xl object-cover border border-slate-100"
-                      />
-                    </div>
-                  )}
-                  <h3 className="font-semibold text-slate-900 text-lg mb-1">
-                    {hobby.name}
-                  </h3>
-                  <p className="text-slate-500 leading-relaxed">
-                    {hobby.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <HobbyCards
+            hobbies={hobbies.map((hobby) => ({
+              id: hobby.id,
+              name: hobby.name,
+              description: hobby.description,
+              imageUrl: hobby.imageUrl,
+            }))}
+          />
         )}
       </div>
     </div>
