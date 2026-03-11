@@ -1,6 +1,6 @@
 "use client";
-+
-+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type CellValue = "X" | "O" | null;
 
@@ -161,7 +161,7 @@ export default function HeroMiniGame() {
           <button
             key={idx}
             onClick={() => handleCellClick(idx)}
-            disabled={isAIThinking || winner || isDraw}
+            disabled={isAIThinking || !!winner || isDraw}
             className="h-16 rounded-xl bg-white/15 hover:bg-white/25 disabled:opacity-50 transition-colors flex items-center justify-center text-2xl font-bold"
             aria-label={`Cell ${idx + 1}`}
           >
