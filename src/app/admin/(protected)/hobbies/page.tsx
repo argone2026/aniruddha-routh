@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Heart, Plus, Pencil, Trash2, X, Loader2, Save } from "lucide-react";
 
 interface Hobby {
@@ -8,6 +9,7 @@ interface Hobby {
   name: string;
   description: string;
   icon: string;
+  imageUrl?: string | null;
 }
 
 const ICON_OPTIONS = ["heart", "star", "trophy"];
@@ -18,6 +20,9 @@ export default function HobbiesAdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Hobby | null>(null);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", icon: "heart" });
 
   async function fetchData() {
@@ -34,12 +39,18 @@ export default function HobbiesAdminPage() {
   function openCreate() {
     setEditing(null);
     setForm({ name: "", description: "", icon: "heart" });
+    setImageFile(null);
+    setImagePreview(null);
+    setRemoveImage(false);
     setShowModal(true);
   }
 
   function openEdit(item: Hobby) {
     setEditing(item);
     setForm({ name: item.name, description: item.description, icon: item.icon });
+    setImageFile(null);
+    setImagePreview(item.imageUrl ?? null);
+    setRemoveImage(false);
     setShowModal(true);
   }
 
@@ -49,15 +60,28 @@ export default function HobbiesAdminPage() {
 
     const url = editing ? `/api/hobbies/${editing.id}` : "/api/hobbies";
     const method = editing ? "PUT" : "POST";
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("icon", form.icon);
+    if (editing) {
+      formData.append("existingImageUrl", editing.imageUrl ?? "");
+      formData.append("imageAction", removeImage ? "remove" : "keep");
+    }
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
     await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: formData,
     });
 
     setSaving(false);
     setShowModal(false);
+    setImageFile(null);
+    setImagePreview(null);
+    setRemoveImage(false);
     fetchData();
   }
 
@@ -110,6 +134,17 @@ export default function HobbiesAdminPage() {
                     <Heart className="w-5 h-5" />
                   </div>
                   <div>
+                    {item.imageUrl && (
+                      <div className="mb-2">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          width={80}
+                          height={56}
+                          className="rounded-lg object-cover border border-slate-100"
+                        />
+                      </div>
+                    )}
                     <h3 className="font-semibold text-slate-900">{item.name}</h3>
                     <p className="text-sm text-slate-500 mt-0.5">{item.description}</p>
                   </div>
@@ -185,6 +220,48 @@ export default function HobbiesAdminPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Image (optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    setImageFile(file);
+                    setRemoveImage(false);
+                    if (file) {
+                      setImagePreview(URL.createObjectURL(file));
+                    } else {
+                      setImagePreview(editing?.imageUrl ?? null);
+                    }
+                  }}
+                  className="w-full text-sm text-slate-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                />
+                {imagePreview && !removeImage && (
+                  <div className="mt-3 flex items-center gap-3">
+                    <Image
+                      src={imagePreview}
+                      alt="Hobby preview"
+                      width={96}
+                      height={72}
+                      className="rounded-lg object-cover border border-slate-200"
+                    />
+                    {editing?.imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoveImage(true);
+                          setImageFile(null);
+                          setImagePreview(null);
+                        }}
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        Remove image
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex gap-3 p-6 pt-0">

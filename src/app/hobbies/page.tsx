@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,17 @@ export default async function HobbiesPage() {
                   <Heart className="w-6 h-6" />
                 </div>
                 <div>
+                  {hobby.imageUrl && (
+                    <div className="mb-3">
+                      <Image
+                        src={hobby.imageUrl}
+                        alt={hobby.name}
+                        width={220}
+                        height={120}
+                        className="rounded-xl object-cover border border-slate-100"
+                      />
+                    </div>
+                  )}
                   <h3 className="font-semibold text-slate-900 text-lg mb-1">
                     {hobby.name}
                   </h3>

@@ -762,6 +762,17 @@ export default async function Home() {
                 const Icon = ICON_MAP[hobby.icon] ?? Heart;
                 return (
                   <div key={hobby.id} className="p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-rose-200 transition-all duration-300 text-center group">
+                    {hobby.imageUrl && (
+                      <div className="mb-4 rounded-xl overflow-hidden border border-slate-100">
+                        <Image
+                          src={hobby.imageUrl}
+                          alt={hobby.name}
+                          width={320}
+                          height={180}
+                          className="w-full h-28 object-cover"
+                        />
+                      </div>
+                    )}
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 mb-4 group-hover:scale-110 transition-transform">
                       <Icon className="w-7 h-7" />
                     </div>
