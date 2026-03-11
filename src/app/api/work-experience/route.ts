@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 
 export async function GET() {
-  const workExperience = await prisma.workExperience.findMany({
+  const workExperienceRaw = await prisma.workExperience.findMany({
     orderBy: { createdAt: "desc" },
   });
+  const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw);
   return NextResponse.json(workExperience);
 }
 

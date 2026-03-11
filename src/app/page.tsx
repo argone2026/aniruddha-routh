@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import HeroMiniGame from "@/components/HeroMiniGame";
+import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -285,11 +286,11 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperience, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
-    prisma.workExperience.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
+    prisma.workExperience.findMany({ orderBy: { createdAt: "desc" } }),
     fetch(
       "https://api.github.com/users/argone2026/repos?sort=created&direction=asc&per_page=3",
       {
@@ -333,6 +334,8 @@ async function getData() {
   const upcomingContests = [...leetCodeUpcoming, ...codeforcesUpcoming]
     .sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
     .slice(0, 10);
+
+  const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
   return { achievements, hobbies, photos, workExperience, projects, codingProfiles, upcomingContests };
 }
