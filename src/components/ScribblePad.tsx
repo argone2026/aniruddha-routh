@@ -1,128 +1,139 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function ScribblePad() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const blobRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
   const [lineWidth, setLineWidth] = useState(3);
   const [isDark, setIsDark] = useState(true);
 
+  // Sync dark mode
   useEffect(() => {
     const root = document.documentElement;
     const syncTheme = () => setIsDark(root.classList.contains("dark"));
     syncTheme();
-
     const observer = new MutationObserver(syncTheme);
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
+  // Init canvas to match its rendered size (called via ResizeObserver so it
+  // always runs after layout — fixes the "canvas escapes container" bug).
+  const initCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    const blob = blobRef.current;
+    if (!canvas || !blob) return;
 
     const dpr = window.devicePixelRatio || 1;
-    // Use the container's width so the canvas fills its column
-    const cssWidth = container.clientWidth || 260;
-    const cssHeight = 220;
+    const cssW = blob.offsetWidth;
+    const cssH = blob.offsetHeight;
+    if (cssW === 0 || cssH === 0) return;
 
-    canvas.width = Math.floor(cssWidth * dpr);
-    canvas.height = Math.floor(cssHeight * dpr);
-    canvas.style.width = `${cssWidth}px`;
-    canvas.style.height = `${cssHeight}px`;
+    // Set backing-store resolution
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#f8fafc";
     ctx.lineWidth = lineWidth;
-
-    // Keep background subtle, especially in dark mode.
     ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
-    ctx.fillRect(0, 0, cssWidth, cssHeight);
+    ctx.fillRect(0, 0, cssW, cssH);
   }, [lineWidth, isDark]);
 
-  function getPoint(event: React.PointerEvent<HTMLCanvasElement>) {
+  // Observe blob container so canvas stays in sync after layout / resize
+  useEffect(() => {
+    const blob = blobRef.current;
+    if (!blob) return;
+    const ro = new ResizeObserver(initCanvas);
+    ro.observe(blob);
+    initCanvas();
+    return () => ro.disconnect();
+  }, [initCanvas]);
+
+  function getPoint(e: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
 
-  function handlePointerDown(event: React.PointerEvent<HTMLCanvasElement>) {
+  function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const { x, y } = getPoint(event);
+    const { x, y } = getPoint(e);
     drawingRef.current = true;
-    canvas.setPointerCapture(event.pointerId);
+    canvas.setPointerCapture(e.pointerId);
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.moveTo(x, y);
   }
 
-  function handlePointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
+  function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!drawingRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const { x, y } = getPoint(event);
+    const { x, y } = getPoint(e);
     ctx.lineTo(x, y);
     ctx.stroke();
   }
 
-  function handlePointerUp(event: React.PointerEvent<HTMLCanvasElement>) {
+  function handlePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     drawingRef.current = false;
-    if (canvas.hasPointerCapture(event.pointerId)) {
-      canvas.releasePointerCapture(event.pointerId);
-    }
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
   }
 
   function clearCanvas() {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const blob = blobRef.current;
+    if (!canvas || !blob) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const cssWidth = parseFloat(canvas.style.width || "260");
-    const cssHeight = parseFloat(canvas.style.height || "220");
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
+    const w = blob.offsetWidth;
+    const h = blob.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
-    ctx.fillRect(0, 0, cssWidth, cssHeight);
+    ctx.fillRect(0, 0, w, h);
   }
 
   return (
-    <div ref={containerRef} className="w-full rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
+    <div className="w-full rounded-3xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-200 dark:shadow-indigo-950/30 text-white">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold tracking-wide uppercase">Scribble Pad</h3>
-        <button onClick={clearCanvas} className="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-md transition-colors">
+        <button
+          onClick={clearCanvas}
+          className="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-md transition-colors"
+        >
           Clear
         </button>
       </div>
 
-      <canvas
-        ref={canvasRef}
-        className="rounded-xl border border-white/15 touch-none cursor-crosshair"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-      />
+      {/* Amoeba-shaped drawing area — border-radius morphs via CSS animation */}
+      <div
+        ref={blobRef}
+        className="scribble-blob w-full overflow-hidden border border-white/20"
+        style={{ height: "210px" }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="block w-full h-full touch-none cursor-crosshair"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        />
+      </div>
 
       <div className="mt-3 flex items-center gap-2 text-xs">
         <span className="text-indigo-100">Brush</span>
