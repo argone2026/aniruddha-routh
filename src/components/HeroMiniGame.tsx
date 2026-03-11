@@ -110,15 +110,6 @@ export default function HeroMiniGame() {
   useEffect(() => {
     if (isAIThinking || winner || isDraw) return;
 
-    const hasX = cells.some((c) => c === "X");
-    const hasO = cells.some((c) => c === "O");
-
-    // AI's turn: X just played, now O plays
-    if (hasX && !hasO) {
-      // Initial board: user plays first
-      return;
-    }
-
     const xCount = cells.filter((c) => c === "X").length;
     const oCount = cells.filter((c) => c === "O").length;
 
@@ -134,7 +125,7 @@ export default function HeroMiniGame() {
           setCells(next);
         }
         setIsAIThinking(false);
-      }, 500);
+      }, 220);
 
       return () => clearTimeout(timer);
     }
