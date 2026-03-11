@@ -14,13 +14,34 @@ import {
 
 export const dynamic = "force-dynamic";
 
+type GitHubRepo = {
+  id: number;
+  name: string;
+  description: string | null;
+  html_url: string;
+  stargazers_count: number;
+  language: string | null;
+};
+
 async function getData() {
-  const [achievements, hobbies, photos] = await Promise.all([
+  const [achievements, hobbies, photos, projects] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
+    fetch(
+      "https://api.github.com/users/argone2026/repos?sort=created&direction=asc&per_page=3",
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+        },
+        next: { revalidate: 3600 },
+      }
+    )
+      .then((res) => (res.ok ? res.json() : []))
+      .then((repos: GitHubRepo[]) => repos.slice(0, 3))
+      .catch(() => [] as GitHubRepo[]),
   ]);
-  return { achievements, hobbies, photos };
+  return { achievements, hobbies, photos, projects };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -30,7 +51,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos } = await getData();
+  const { achievements, hobbies, photos, projects } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -48,6 +69,7 @@ export default async function Home() {
             <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
             <Link href="#hobbies" className="text-slate-600 hover:text-indigo-600 transition-colors">Hobbies</Link>
             <Link href="#gallery" className="text-slate-600 hover:text-indigo-600 transition-colors">Gallery</Link>
+            <Link href="#projects" className="text-slate-600 hover:text-indigo-600 transition-colors">Projects</Link>
             <Link href="#contact" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">Contact</Link>
           </div>
         </div>
@@ -225,6 +247,54 @@ export default async function Home() {
                     </div>
                   )}
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section id="projects" className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Projects</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full" />
+            </div>
+            <a
+              href="https://github.com/argone2026"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+            >
+              Show more <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          {projects.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <Github className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Projects are temporarily unavailable.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <a
+                  key={project.id}
+                  href={project.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
+                >
+                  <h3 className="font-semibold text-slate-900 mb-2 line-clamp-1">{project.name}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed mb-4 min-h-[42px]">
+                    {project.description ?? "No description provided."}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>{project.language ?? "Unknown"}</span>
+                    <span>Stars: {project.stargazers_count}</span>
+                  </div>
+                </a>
               ))}
             </div>
           )}
