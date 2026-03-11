@@ -67,8 +67,14 @@ export default async function Home() {
                 Aniruddha Routh
               </span>
             </h1>
-            <p className="text-xl text-slate-600 leading-relaxed max-w-xl">
-              A passionate individual who loves exploring technology, creativity, and life. Welcome to my personal space on the internet.
+            <p className="text-xl text-slate-600 leading-relaxed max-w-2xl">
+              Software engineer focused on building things that actually work.
+              <br />
+              <br />
+              I turn messy problems into clean systems using Python, Java, and machine learning. My work sits at the intersection of software engineering and practical AI - APIs, data pipelines, and products that solve real problems.
+              <br />
+              <br />
+              When I&apos;m not writing code, I&apos;m lifting heavy, studying systems deeply, or building the next version of myself.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="#achievements" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors font-medium">
