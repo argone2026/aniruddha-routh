@@ -6,6 +6,7 @@ import {
   Heart,
   Image as ImageIcon,
   Briefcase,
+  Code2,
   ArrowRight,
   Star,
   Mail,
@@ -24,8 +25,155 @@ type GitHubRepo = {
   language: string | null;
 };
 
+type HeatmapCell = {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+};
+
+type CodingProfile = {
+  name: "LeetCode" | "GitHub" | "Codeforces";
+  handle: string;
+  url: string;
+  cells: HeatmapCell[];
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isoDay(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function buildHeatmapCells(activityByDay: Map<string, number>, totalDays = 98): HeatmapCell[] {
+  const today = new Date();
+  const days: HeatmapCell[] = [];
+  let maxCount = 0;
+
+  for (let i = totalDays - 1; i >= 0; i -= 1) {
+    const date = new Date(today.getTime() - i * DAY_MS);
+    const key = isoDay(date);
+    const count = activityByDay.get(key) ?? 0;
+    maxCount = Math.max(maxCount, count);
+    days.push({ date: key, count, level: 0 });
+  }
+
+  if (maxCount === 0) return days;
+
+  return days.map((cell) => {
+    if (cell.count === 0) return cell;
+    const ratio = cell.count / maxCount;
+    const level = ratio >= 0.75 ? 4 : ratio >= 0.5 ? 3 : ratio >= 0.25 ? 2 : 1;
+    return { ...cell, level: level as 1 | 2 | 3 | 4 };
+  });
+}
+
+async function fetchGitHubActivity(handle: string): Promise<Map<string, number>> {
+  try {
+    const res = await fetch(`https://api.github.com/users/${handle}/events/public?per_page=100`, {
+      headers: { Accept: "application/vnd.github+json" },
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return new Map();
+
+    const events = (await res.json()) as Array<{ created_at?: string }>;
+    const map = new Map<string, number>();
+    for (const event of events) {
+      if (!event.created_at) continue;
+      const key = event.created_at.slice(0, 10);
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function fetchLeetCodeActivity(handle: string): Promise<Map<string, number>> {
+  try {
+    const query = `query userProfileCalendar($username: String!, $year: Int) {\n  matchedUser(username: $username) {\n    userCalendar(year: $year) {\n      submissionCalendar\n    }\n  }\n}`;
+    const year = new Date().getUTCFullYear();
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables: { username: handle, year },
+      }),
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return new Map();
+
+    const json = (await res.json()) as {
+      data?: {
+        matchedUser?: {
+          userCalendar?: {
+            submissionCalendar?: string;
+          };
+        };
+      };
+    };
+
+    const calendarRaw = json.data?.matchedUser?.userCalendar?.submissionCalendar;
+    if (!calendarRaw) return new Map();
+
+    const calendar = JSON.parse(calendarRaw) as Record<string, number>;
+    const map = new Map<string, number>();
+    for (const [timestamp, count] of Object.entries(calendar)) {
+      const date = new Date(Number(timestamp) * 1000);
+      const key = isoDay(date);
+      map.set(key, (map.get(key) ?? 0) + Number(count));
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function fetchCodeforcesActivity(handle: string): Promise<Map<string, number>> {
+  try {
+    const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=1000`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return new Map();
+
+    const json = (await res.json()) as {
+      status?: string;
+      result?: Array<{ creationTimeSeconds?: number }>;
+    };
+    if (json.status !== "OK" || !json.result) return new Map();
+
+    const map = new Map<string, number>();
+    for (const submission of json.result) {
+      if (!submission.creationTimeSeconds) continue;
+      const date = new Date(submission.creationTimeSeconds * 1000);
+      const key = isoDay(date);
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+function getHeatCellClass(level: HeatmapCell["level"]) {
+  switch (level) {
+    case 1:
+      return "bg-emerald-200";
+    case 2:
+      return "bg-emerald-300";
+    case 3:
+      return "bg-emerald-400";
+    case 4:
+      return "bg-emerald-500";
+    default:
+      return "bg-slate-200";
+  }
+}
+
 async function getData() {
-  const [achievements, hobbies, photos, workExperience, projects] = await Promise.all([
+  const [achievements, hobbies, photos, workExperience, projects, leetcodeActivity, githubActivity, codeforcesActivity] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -42,8 +190,33 @@ async function getData() {
       .then((res) => (res.ok ? res.json() : []))
       .then((repos: GitHubRepo[]) => repos.slice(0, 3))
       .catch(() => [] as GitHubRepo[]),
+    fetchLeetCodeActivity("aniruddharouth"),
+    fetchGitHubActivity("argone2026"),
+    fetchCodeforcesActivity("argone.exe"),
   ]);
-  return { achievements, hobbies, photos, workExperience, projects };
+
+  const codingProfiles: CodingProfile[] = [
+    {
+      name: "LeetCode",
+      handle: "aniruddharouth",
+      url: "https://leetcode.com/u/aniruddharouth/",
+      cells: buildHeatmapCells(leetcodeActivity),
+    },
+    {
+      name: "GitHub",
+      handle: "argone2026",
+      url: "https://github.com/argone2026",
+      cells: buildHeatmapCells(githubActivity),
+    },
+    {
+      name: "Codeforces",
+      handle: "argone.exe",
+      url: "https://codeforces.com/profile/argone.exe",
+      cells: buildHeatmapCells(codeforcesActivity),
+    },
+  ];
+
+  return { achievements, hobbies, photos, workExperience, projects, codingProfiles };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -53,7 +226,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, projects } = await getData();
+  const { achievements, hobbies, photos, workExperience, projects, codingProfiles } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -68,6 +241,7 @@ export default async function Home() {
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="#about" className="text-slate-600 hover:text-indigo-600 transition-colors">About</Link>
+            <Link href="#coding" className="text-slate-600 hover:text-indigo-600 transition-colors">Coding</Link>
             <Link href="#experience" className="text-slate-600 hover:text-indigo-600 transition-colors">Experience</Link>
             <Link href="#projects" className="text-slate-600 hover:text-indigo-600 transition-colors">Projects</Link>
             <Link href="#achievements" className="text-slate-600 hover:text-indigo-600 transition-colors">Achievements</Link>
@@ -229,6 +403,55 @@ export default async function Home() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Coding Profiles Section */}
+      <section id="coding" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Coding Profiles</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {codingProfiles.map((profile) => (
+              <a
+                key={profile.name}
+                href={profile.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-lg hover:border-emerald-200 transition-all duration-300"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{profile.name}</h3>
+                    <p className="text-sm text-slate-500">@{profile.handle}</p>
+                  </div>
+                  <Code2 className="w-5 h-5 text-emerald-500" />
+                </div>
+
+                <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+                  {profile.cells.map((cell) => (
+                    <div
+                      key={`${profile.name}-${cell.date}`}
+                      title={`${cell.date}: ${cell.count} activity`}
+                      className={`w-2.5 h-2.5 rounded-sm ${getHeatCellClass(cell.level)}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-4 text-xs text-slate-500 flex items-center justify-between">
+                  <span>Last {profile.cells.length} days</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
+                    Open profile <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
