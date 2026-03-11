@@ -607,6 +607,7 @@ export default async function Home() {
                   <h4 className="font-semibold text-slate-900 line-clamp-2 mb-2">{contest.name}</h4>
                   <p className="text-sm text-slate-500">
                     {new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                      timeZone: "Asia/Kolkata",
                       weekday: "short",
                       day: "2-digit",
                       month: "short",
