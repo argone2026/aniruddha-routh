@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import HeroMiniGame from "@/components/HeroMiniGame";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -402,9 +403,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <div className="w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-200 text-white text-6xl font-bold">
-            AR
-          </div>
+          <HeroMiniGame />
         </div>
       </section>
 
