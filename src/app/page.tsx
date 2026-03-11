@@ -286,11 +286,12 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
     prisma.workExperience.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.note.findMany({ orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }], take: 4 }),
     fetch(
       "https://api.github.com/users/argone2026/repos?sort=updated&direction=desc&per_page=20",
       {
@@ -338,7 +339,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, projects, codingProfiles, upcomingContests };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -348,7 +349,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, projects, codingProfiles, upcomingContests } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -745,6 +746,38 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Notes Section */}
+      <section id="notes" className="py-20 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Notes</h2>
+              <p className="text-slate-500 text-sm">Quick thoughts and updates.</p>
+            </div>
+          </div>
+
+          {notes.length === 0 ? (
+            <div className="text-center py-10 text-slate-400 text-sm border border-slate-100 rounded-2xl bg-slate-50">
+              No notes published yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notes.map((note) => (
+                <div key={note.id} className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-medium text-slate-900 text-sm">{note.title}</h3>
+                    {note.pinned && (
+                      <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">Pinned</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-600 line-clamp-3">{note.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section id="contact" className="py-20 px-6 bg-white">
         <div className="max-w-2xl mx-auto text-center">
@@ -792,6 +825,7 @@ export default async function Home() {
             >
               LinkedIn
             </a>
+            <Link href="#notes" className="text-slate-500 hover:text-indigo-600 transition-colors">Notes</Link>
             <Link href="/goals" className="text-slate-500 hover:text-indigo-600 transition-colors">Goals</Link>
             <Link href="/admin/login" className="text-slate-400 hover:text-slate-600 transition-colors">Admin</Link>
           </div>
