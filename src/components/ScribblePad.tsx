@@ -105,6 +105,11 @@ export default function ScribblePad() {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
     ctx.fillRect(0, 0, w, h);
+
+    // Increment doodle counter
+    fetch("/api/doodles", { method: "POST" }).catch(() => {
+      // Silently fail if API call doesn't work
+    });
   }
 
   return (
