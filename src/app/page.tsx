@@ -3,6 +3,7 @@ import ScribblePad from "@/components/ScribblePad";
 import VisitorNoteBox from "@/components/VisitorNoteBox";
 import GalleryGrid from "@/components/GalleryGrid";
 import HobbyCards from "@/components/HobbyCards";
+import SiteStats from "@/components/SiteStats";
 import { sortWorkExperienceByMostRecent } from "@/lib/workExperienceSort";
 import Link from "next/link";
 import Image from "next/image";
@@ -335,7 +336,7 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig, bioConfig] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig, bioConfig, visitorMessageCount, achievementCount] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -362,6 +363,8 @@ async function getData() {
     fetchSavageThought(),
     prisma.siteConfig.findUnique({ where: { key: "profilePictureUrl" } }),
     prisma.siteConfig.findUnique({ where: { key: "landingPageBio" } }),
+    prisma.visitorMessage.count(),
+    prisma.achievement.count(),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -391,7 +394,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null, bio: bioConfig?.value ?? null };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null, bio: bioConfig?.value ?? null, visitorCount: visitorMessageCount, achievementCount };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -401,7 +404,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl, bio } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl, bio, visitorCount, achievementCount } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -533,6 +536,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Site Stats Section */}
+      <SiteStats visitorCount={visitorCount} achievementCount={achievementCount} />
 
       {/* About Section */}
       <section id="about" className="py-20 px-6 bg-white">
