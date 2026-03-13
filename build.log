@@ -1,0 +1,26 @@
+
+> aniruddha-routh@0.1.0 prebuild
+> prisma generate
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+warn Preview feature "driverAdapters" is deprecated. The functionality can be used without specifying it as a preview feature.
+
+✔ Generated Prisma Client (7.4.2) to ./src/generated/prisma in 51ms
+
+
+> aniruddha-routh@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1993.5ms
+  Running TypeScript ...
+Failed to compile.
+
+Type error: Cannot find module '../../src/app/admin/(protected/)/site-bio/page.js' or its corresponding type declarations.
+
+Next.js build worker exited with code: 1 and signal: null

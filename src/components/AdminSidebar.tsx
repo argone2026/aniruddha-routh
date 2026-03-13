@@ -15,11 +15,13 @@ import {
   LogOut,
   ExternalLink,
   User,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/profile", icon: User, label: "Profile Picture" },
+  { href: "/admin/site-bio", icon: FileText, label: "Site Bio" },
   { href: "/admin/notes", icon: StickyNote, label: "Notes" },
   { href: "/admin/achievements", icon: Trophy, label: "Achievements" },
   { href: "/admin/goals", icon: Target, label: "Goals" },

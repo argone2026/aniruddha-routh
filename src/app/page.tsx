@@ -335,7 +335,7 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig, bioConfig] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -361,6 +361,7 @@ async function getData() {
     fetchCodeforcesUpcomingContests(),
     fetchSavageThought(),
     prisma.siteConfig.findUnique({ where: { key: "profilePictureUrl" } }),
+    prisma.siteConfig.findUnique({ where: { key: "landingPageBio" } }),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -390,7 +391,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null, bio: bioConfig?.value ?? null };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -400,7 +401,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl, bio } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -439,13 +440,29 @@ export default async function Home() {
               </span>
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed max-w-2xl">
-              Hey, I'm someone who enjoys building things that actually work.
-              <br />
-              <br />
-              I like turning messy ideas into simple, reliable systems and products that solve real problems.
-              <br />
-              <br />
-              When I&apos;m not writing code, I&apos;m lifting heavy, learning something new, or building the next version of myself.
+              {bio ? (
+                bio.split("\n\n").map((paragraph, idx) => (
+                  <span key={idx}>
+                    {paragraph}
+                    {idx < bio.split("\n\n").length - 1 ? (
+                      <>
+                        <br />
+                        <br />
+                      </>
+                    ) : null}
+                  </span>
+                ))
+              ) : (
+                <>
+                  Hey, I&apos;m someone who enjoys building things that actually work.
+                  <br />
+                  <br />
+                  I like turning messy ideas into simple, reliable systems and products that solve real problems.
+                  <br />
+                  <br />
+                  When I&apos;m not writing code, I&apos;m lifting heavy, learning something new, or building the next version of myself.
+                </>
+              )}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="#projects" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors font-medium">
