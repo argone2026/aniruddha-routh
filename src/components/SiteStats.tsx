@@ -12,7 +12,7 @@ export default function SiteStats({ visitorCount, doodleCount }: SiteStatsProps)
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="fixed bottom-6 left-6 z-40">
+    <div className="fixed top-20 right-6 z-40">
       {isExpanded ? (
         // Expanded view
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl dark:shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-80 animate-in slide-in-from-bottom-2 duration-200">
