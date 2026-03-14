@@ -44,7 +44,7 @@ export default function ScribblePad() {
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#f8fafc";
     ctx.lineWidth = lineWidth;
-    ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
+    ctx.fillStyle = "#1f2937";
     ctx.fillRect(0, 0, cssW, cssH);
   }, [lineWidth, isDark]);
 
@@ -105,7 +105,7 @@ export default function ScribblePad() {
     const w = blob.offsetWidth;
     const h = blob.offsetHeight;
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = isDark ? "rgba(255,255,255,0.025)" : "rgba(255,255,255,0.08)";
+    ctx.fillStyle = "#1f2937";
     ctx.fillRect(0, 0, w, h);
 
     // Increment doodle counter
