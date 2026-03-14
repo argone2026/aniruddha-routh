@@ -366,7 +366,7 @@ async function getData() {
     prisma.siteConfig.findUnique({ where: { key: "landingPageBio" } }),
     prisma.visitorMessage.count(),
     prisma.siteConfig.findUnique({ where: { key: "doodleCount" } }),
-    prisma.doodle.findMany({ orderBy: { createdAt: "desc" }, take: 10 }),
+    prisma.doodle.findMany({ orderBy: { createdAt: "desc" }, take: 12 }),
   ]);
 
   const codingProfiles: CodingProfile[] = [
