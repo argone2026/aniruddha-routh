@@ -1,9 +1,28 @@
 import { prisma } from "@/lib/db";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
+
+const DOODLES_DIR = join(process.cwd(), "public/doodles");
+
+// Ensure doodles directory exists
+async function ensureDoodlesDir() {
+  if (!existsSync(DOODLES_DIR)) {
+    await mkdir(DOODLES_DIR, { recursive: true });
+  }
+}
 
 export async function GET() {
   try {
     const doodles = await prisma.doodle.findMany({
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        imageUrl: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return Response.json(doodles);
   } catch (error) {
@@ -26,24 +45,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Convert base64 to buffer for blob upload
+    // Ensure doodles directory exists
+    await ensureDoodlesDir();
+
+    // Convert base64 to buffer
     const base64Data = imageData.includes(",") 
       ? imageData.split(",")[1] 
       : imageData;
 
-    // Create a simple base64 data URL for storage
-    // For now, store the data URL directly since it's smaller
+    const buffer = Buffer.from(base64Data, "base64");
+    const fileName = `doodle-${Date.now()}.png`;
+    const filePath = join(DOODLES_DIR, fileName);
+    const imageUrl = `/doodles/${fileName}`;
+
+    // Save to local public folder
+    await writeFile(filePath, buffer);
+
+    // Save URL to database
     const doodle = await prisma.doodle.create({
       data: {
-        imageUrl: imageData, // Store the full data URL
+        imageUrl: imageUrl,
         title: title || `Doodle from ${new Date().toLocaleDateString()}`,
       },
     });
 
     // Increment doodle count
+    const currentCount = await prisma.siteConfig.findUnique({
+      where: { key: "doodleCount" },
+    });
+    const newCount = parseInt(currentCount?.value ?? "0") + 1;
+
     await prisma.siteConfig.upsert({
       where: { key: "doodleCount" },
-      update: { value: (parseInt((await prisma.siteConfig.findUnique({ where: { key: "doodleCount" } }))?.value ?? "0") + 1).toString() },
+      update: { value: newCount.toString() },
       create: { key: "doodleCount", value: "1" },
     });
 
@@ -52,9 +86,11 @@ export async function POST(request: Request) {
       doodle,
     });
   } catch (error) {
-    console.error("Error saving doodle:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error saving doodle:", errorMessage);
+    console.error("Full error:", error);
     return Response.json(
-      { error: "Failed to save doodle" },
+      { error: "Failed to save doodle", details: errorMessage },
       { status: 500 }
     );
   }

@@ -20,6 +20,10 @@
 # production
 /build
 
+# user-generated uploads and doodles
+/public/uploads
+/public/doodles
+
 # misc
 .DS_Store
 *.pem
