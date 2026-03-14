@@ -15,6 +15,7 @@ export default function DoodlesPage() {
   const [doodles, setDoodles] = useState<Doodle[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [selectedDoodle, setSelectedDoodle] = useState<Doodle | null>(null);
 
   useEffect(() => {
     const fetchDoodles = async () => {
@@ -33,6 +34,20 @@ export default function DoodlesPage() {
 
     fetchDoodles();
   }, []);
+
+  // Keyboard handler for closing modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedDoodle(null);
+      }
+    };
+
+    if (selectedDoodle) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [selectedDoodle]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this doodle?")) return;
@@ -98,7 +113,10 @@ export default function DoodlesPage() {
               className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300"
             >
               {/* Image Container */}
-              <div className="relative bg-slate-100 aspect-square overflow-hidden">
+              <div 
+                className="relative bg-slate-100 aspect-square overflow-hidden cursor-pointer group/image"
+                onClick={() => setSelectedDoodle(doodle)}
+              >
                 <img
                   src={doodle.imageUrl}
                   alt={doodle.title || "Doodle"}
@@ -143,6 +161,96 @@ export default function DoodlesPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Full View Modal */}
+      {selectedDoodle && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedDoodle(null)}
+        >
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedDoodle(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors"
+              title="Close (ESC)"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Image */}
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={selectedDoodle.imageUrl}
+                  alt={selectedDoodle.title || "Doodle"}
+                  className="max-h-[60vh] object-contain rounded-lg"
+                />
+              </div>
+
+              {/* Info and Actions */}
+              <div className="border-t border-slate-200 pt-6">
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                    {selectedDoodle.title}
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Created:{" "}
+                    {new Date(selectedDoodle.createdAt).toLocaleDateString(
+                      "en-IN",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      }
+                    )}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleDownload(selectedDoodle)}
+                    className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    <Download className="w-5 h-5" />
+                    Download
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDelete(selectedDoodle.id);
+                      setSelectedDoodle(null);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
