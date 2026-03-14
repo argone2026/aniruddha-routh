@@ -7,9 +7,12 @@ export default function ScribblePad() {
   const blobRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingRef = useRef(false);
+  const hasContentRef = useRef(false);
   const [lineWidth, setLineWidth] = useState(3);
   const [isDark, setIsDark] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
   // Sync dark mode
   useEffect(() => {
@@ -87,6 +90,12 @@ export default function ScribblePad() {
     const { x, y } = getPoint(e);
     ctx.lineTo(x, y);
     ctx.stroke();
+    
+    // Mark that drawing has occurred
+    if (!hasContentRef.current) {
+      hasContentRef.current = true;
+      setHasDrawn(true);
+    }
   }
 
   function handlePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -108,15 +117,15 @@ export default function ScribblePad() {
     ctx.fillStyle = "#1f2937";
     ctx.fillRect(0, 0, w, h);
 
-    // Increment doodle counter
-    fetch("/api/doodles", { method: "POST" }).catch(() => {
-      // Silently fail if API call doesn't work
-    });
+    // Reset drawing state for new doodle
+    hasContentRef.current = false;
+    setHasDrawn(false);
+    setHasBeenSaved(false);
   }
 
   async function saveDoodle() {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || hasBeenSaved || !hasDrawn) return;
 
     setIsSaving(true);
     try {
@@ -132,6 +141,7 @@ export default function ScribblePad() {
 
       if (response.ok) {
         alert("Doodle saved! 🎨");
+        setHasBeenSaved(true);
       } else {
         alert("Failed to save doodle");
       }
@@ -150,11 +160,12 @@ export default function ScribblePad() {
         <div className="flex gap-2">
           <button
             onClick={saveDoodle}
-            disabled={isSaving}
+            disabled={isSaving || !hasDrawn || hasBeenSaved}
             className="rounded-full border border-slate-700 bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1.5 text-xs text-white transition-all hover:shadow-lg disabled:opacity-50 flex items-center gap-1"
+            title={hasBeenSaved ? "Already saved in this session" : !hasDrawn ? "Draw something first" : "Save your doodle"}
           >
             {isSaving ? <Loader className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? "Saving..." : hasBeenSaved ? "Saved" : "Save"}
           </button>
           <button
             onClick={clearCanvas}
