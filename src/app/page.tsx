@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import ScribblePad from "@/components/ScribblePad";
 import VisitorNoteBox from "@/components/VisitorNoteBox";
+import DoodlesGrid from "@/components/DoodlesGrid";
 import GalleryGrid from "@/components/GalleryGrid";
 import HobbyCards from "@/components/HobbyCards";
 import SiteStats from "@/components/SiteStats";
@@ -336,7 +337,7 @@ async function fetchCodeforcesUpcomingContests(): Promise<UpcomingContest[]> {
 }
 
 async function getData() {
-  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig, bioConfig, visitorMessageCount, doodleConfigRaw] = await Promise.all([
+  const [achievements, hobbies, photos, workExperienceRaw, notes, projects, leetcodeActivity, githubActivity, codeforcesActivity, leetCodeUpcoming, codeforcesUpcoming, savageThought, profilePicConfig, bioConfig, visitorMessageCount, doodleConfigRaw, doodles] = await Promise.all([
     prisma.achievement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.hobby.findMany({ orderBy: { createdAt: "asc" }, take: 4 }),
     prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
@@ -365,6 +366,7 @@ async function getData() {
     prisma.siteConfig.findUnique({ where: { key: "landingPageBio" } }),
     prisma.visitorMessage.count(),
     prisma.siteConfig.findUnique({ where: { key: "doodleCount" } }),
+    prisma.doodle.findMany({ orderBy: { createdAt: "desc" }, take: 10 }),
   ]);
 
   const codingProfiles: CodingProfile[] = [
@@ -394,7 +396,7 @@ async function getData() {
 
   const workExperience = sortWorkExperienceByMostRecent(workExperienceRaw).slice(0, 4);
 
-  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null, bio: bioConfig?.value ?? null, visitorCount: visitorMessageCount, doodleCount: parseInt(doodleConfigRaw?.value ?? "0") };
+  return { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl: profilePicConfig?.value ?? null, bio: bioConfig?.value ?? null, visitorCount: visitorMessageCount, doodleCount: parseInt(doodleConfigRaw?.value ?? "0"), doodles };
 }
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -404,7 +406,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default async function Home() {
-  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl, bio, visitorCount, doodleCount } = await getData();
+  const { achievements, hobbies, photos, workExperience, notes, projects, codingProfiles, upcomingContests, savageThought, profilePictureUrl, bio, visitorCount, doodleCount, doodles } = await getData();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -511,7 +513,7 @@ export default async function Home() {
       </section>
 
       {/* Interactive Zone */}
-      <section className="py-10 px-6">
+      <section className="py-10 px-6" id="interactive-zone">
         <div className="mx-auto grid max-w-6xl items-start gap-8 md:grid-cols-2">
           <div className="w-full md:max-w-[430px] md:justify-self-start">
             <VisitorNoteBox />
@@ -521,6 +523,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Doodles Gallery */}
+      <DoodlesGrid doodles={doodles} />
 
       {/* Savage Thought Section */}
       <section className="pb-6 px-6">
