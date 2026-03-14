@@ -3,9 +3,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aniruddha Routh | Personal Portfolio",
+  title: "Aniruddha Routh | Web Base",
   description:
-    "Personal portfolio of Aniruddha Routh — achievements, hobbies, gallery and more.",
+    "Checking out Aniruddha's space — achievements, hobbies, doodles, and more.",
 };
 
 export default function RootLayout({

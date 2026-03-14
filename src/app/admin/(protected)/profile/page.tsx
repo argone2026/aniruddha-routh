@@ -162,7 +162,7 @@ export default function ProfilePictureAdminPage() {
       </div>
 
       <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 text-sm text-indigo-700">
-        <strong>Tip:</strong> Your profile picture is displayed in the hero section of your portfolio. For best results, use a square photo (at least 400×400 px).
+        <strong>Tip:</strong> Your profile picture is displayed in the hero section. For best results, use a square photo (at least 400×400 px).
       </div>
     </div>
   );

@@ -349,7 +349,7 @@ async function getData() {
         cache: "no-store",
         headers: {
           Accept: "application/vnd.github+json",
-          "User-Agent": "aniruddha-routh-portfolio",
+          "User-Agent": "aniruddha-routh-website",
         },
       }
     )

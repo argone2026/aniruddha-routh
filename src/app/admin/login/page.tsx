@@ -42,7 +42,7 @@ export default function LoginPage() {
             AR
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Login</h1>
-          <p className="text-slate-500 mt-2">Sign in to manage your portfolio</p>
+          <p className="text-slate-500 mt-2">Sign in to manage your site</p>
         </div>
 
         <form

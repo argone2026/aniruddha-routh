@@ -48,7 +48,7 @@ export default async function DashboardPage() {
           Welcome back, {session?.user?.name ?? "Admin"}! 👋
         </h1>
         <p className="text-slate-500 mt-2">
-          Here&apos;s an overview of your portfolio content.
+          Here&apos;s an overview of your site content.
         </p>
       </div>
 

@@ -1,10 +1,10 @@
-# Aniruddha Routh — Personal Portfolio
+# Aniruddha Routh — Personal Website
 
-A modern personal portfolio website with an admin dashboard built with Next.js 16, TypeScript, Tailwind CSS, and SQLite.
+A modern personal website with an admin dashboard built with Next.js 16, TypeScript, Tailwind CSS, and SQLite.
 https://aniruddha-routh-kuli.vercel.app/
 ## Features
 
-### Public Portfolio
+### Public Website
 - 🏠 **Home page** — Hero, About, Achievements, Hobbies, Gallery, Contact sections
 - 🏆 **Achievements** — Full list of milestones
 - ❤️ **Hobbies** — All interests and hobbies
@@ -12,7 +12,7 @@ https://aniruddha-routh-kuli.vercel.app/
 
 ### Admin Dashboard (`/admin`)
 - 📝 **Notes** — Create, edit, pin, and delete personal notes
-- 🏆 **Achievements** — Add/edit/delete achievements shown on portfolio
+- 🏆 **Achievements** — Add/edit/delete achievements shown on the site
 - ❤️ **Hobbies** — Manage hobbies and interests
 - 🖼️ **Gallery** — Upload and manage photos
 
@@ -62,7 +62,7 @@ http://localhost:3000/api/seed
 npm run dev
 ```
 
-Visit `http://localhost:3000` for the portfolio and `/admin/login` for the admin dashboard.
+Visit `http://localhost:3000` for the website and `/admin/login` for the admin dashboard.
 
 ## Deployment
 
