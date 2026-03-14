@@ -86,6 +86,14 @@ model VisitorMessage {
   createdAt DateTime @default(now())
 }
 
+model Doodle {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model SiteConfig {
   key       String   @id
   value     String

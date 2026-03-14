@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Download, Loader } from "lucide-react";
 
 export default function ScribblePad() {
   const blobRef = useRef<HTMLDivElement | null>(null);
@@ -8,6 +9,7 @@ export default function ScribblePad() {
   const drawingRef = useRef(false);
   const [lineWidth, setLineWidth] = useState(3);
   const [isDark, setIsDark] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync dark mode
   useEffect(() => {
@@ -112,16 +114,55 @@ export default function ScribblePad() {
     });
   }
 
+  async function saveDoodle() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    setIsSaving(true);
+    try {
+      const imageData = canvas.toDataURL("image/png");
+      const response = await fetch("/api/doodles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageData,
+          title: `Doodle from ${new Date().toLocaleDateString()}`,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Doodle saved! 🎨");
+      } else {
+        alert("Failed to save doodle");
+      }
+    } catch (error) {
+      console.error("Error saving doodle:", error);
+      alert("Error saving doodle");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="w-full overflow-hidden rounded-3xl border border-slate-700/80 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 px-5 py-5 text-slate-100 shadow-xl">
       <div className="mb-4 flex items-center justify-between gap-3">
         <span className="text-[11px] font-medium uppercase tracking-[0.26em] text-slate-400">Doodle</span>
-        <button
-          onClick={clearCanvas}
-          className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs text-slate-200 transition-colors hover:bg-slate-800"
-        >
-          Clear
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={saveDoodle}
+            disabled={isSaving}
+            className="rounded-full border border-slate-700 bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1.5 text-xs text-white transition-all hover:shadow-lg disabled:opacity-50 flex items-center gap-1"
+          >
+            {isSaving ? <Loader className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+          <button
+            onClick={clearCanvas}
+            className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs text-slate-200 transition-colors hover:bg-slate-800"
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       {/* Drawing area */}
