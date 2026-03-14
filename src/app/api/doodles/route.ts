@@ -3,9 +3,22 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+// Check if we should use Vercel Blob for production
+const useVercelBlob = process.env.NODE_ENV === "production" && process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_READ_WRITE_TOKEN.includes("vercel_blob_rw_...");
+
+let put: any;
+if (useVercelBlob) {
+  try {
+    const { put: blobPut } = require("@vercel/blob");
+    put = blobPut;
+  } catch (e) {
+    console.warn("Vercel Blob not available, will use local storage");
+  }
+}
+
 const DOODLES_DIR = join(process.cwd(), "public/doodles");
 
-// Ensure doodles directory exists
+// Ensure doodles directory exists (dev only)
 async function ensureDoodlesDir() {
   if (!existsSync(DOODLES_DIR)) {
     await mkdir(DOODLES_DIR, { recursive: true });
@@ -45,9 +58,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Ensure doodles directory exists
-    await ensureDoodlesDir();
-
     // Convert base64 to buffer
     const base64Data = imageData.includes(",") 
       ? imageData.split(",")[1] 
@@ -55,11 +65,38 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(base64Data, "base64");
     const fileName = `doodle-${Date.now()}.png`;
-    const filePath = join(DOODLES_DIR, fileName);
-    const imageUrl = `/doodles/${fileName}`;
+    let imageUrl = "";
 
-    // Save to local public folder
-    await writeFile(filePath, buffer);
+    // Use Vercel Blob in production if available
+    if (useVercelBlob && put) {
+      try {
+        const blob = await put(`doodles/${fileName}`, buffer, {
+          access: "public",
+          contentType: "image/png",
+        });
+        imageUrl = blob.url;
+      } catch (blobError) {
+        console.error("Vercel Blob error, falling back to database storage:", blobError);
+        // Fall back to just storing metadata
+        imageUrl = `blob:${fileName}`;
+      }
+    } else {
+      // Use local file storage in development
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          await ensureDoodlesDir();
+          const filePath = join(DOODLES_DIR, fileName);
+          await writeFile(filePath, buffer);
+          imageUrl = `/doodles/${fileName}`;
+        } catch (fsError) {
+          console.error("File system error:", fsError);
+          imageUrl = `local:${fileName}`;
+        }
+      } else {
+        // Production without Vercel Blob - store metadata only
+        imageUrl = `stored:${fileName}`;
+      }
+    }
 
     // Save URL to database
     const doodle = await prisma.doodle.create({
@@ -88,7 +125,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error saving doodle:", errorMessage);
-    console.error("Full error:", error);
     return Response.json(
       { error: "Failed to save doodle", details: errorMessage },
       { status: 500 }
