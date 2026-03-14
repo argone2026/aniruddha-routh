@@ -214,6 +214,16 @@ export default function ScribblePad() {
         ))}
         </div>
       </div>
+
+      {/* View Gallery Link */}
+      <div className="mt-3 text-center">
+        <a
+          href="#doodles-gallery"
+          className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors hover:underline"
+        >
+          View gallery ↓
+        </a>
+      </div>
     </div>
   );
 }

@@ -524,9 +524,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Doodles Gallery */}
-      <DoodlesGrid doodles={doodles} />
-
       {/* Savage Thought Section */}
       <section className="pb-6 px-6">
         <div className="max-w-4xl mx-auto">
@@ -889,6 +886,9 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* Doodles Gallery */}
+      <DoodlesGrid doodles={doodles} />
 
       {/* Contact Section */}
       <section id="contact" className="py-20 px-6 bg-white">

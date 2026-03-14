@@ -41,28 +41,52 @@ export default function DoodlesGrid({ doodles }: { doodles: Doodle[] }) {
     return { shape, rotation };
   };
 
+  // Adaptive sizing based on doodle count
+  const getDoodleSize = () => {
+    const count = doodles.length;
+    if (count === 1) return "140px";
+    if (count === 2) return "160px";
+    if (count <= 4) return "180px";
+    return "220px";
+  };
+
+  const getContainerPadding = () => {
+    const count = doodles.length;
+    if (count === 1) return "py-6";
+    if (count === 2) return "py-8";
+    if (count <= 4) return "py-10";
+    return "py-16";
+  };
+
+  const doodleSize = getDoodleSize();
+
   return (
-    <section className="relative w-full py-16 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 bg-gradient-to-b from-slate-100 to-slate-50">
+    <section className={`relative w-full ${getContainerPadding()} dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 bg-gradient-to-b from-slate-100 to-slate-50`} id="doodles-gallery">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         {/* Header */}
-        <div className="mb-12 text-center">
+        <div className={`${doodles.length > 4 ? "mb-12" : doodles.length > 2 ? "mb-8" : "mb-6"} text-center`}>
           <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
             ✨ Creative Canvas
           </span>
-          <h2 className="mt-2 text-4xl font-bold dark:text-slate-50 text-slate-950">
+          <h2 className={`mt-2 ${doodles.length > 4 ? "text-4xl" : doodles.length > 2 ? "text-3xl" : "text-2xl"} font-bold dark:text-slate-50 text-slate-950`}>
             Doodle Gallery
           </h2>
           <p className="mt-3 text-sm dark:text-slate-400 text-slate-600 max-w-xl mx-auto">
-            Raw thoughts. Unfiltered creativity. {doodles.length} doodles saved so far 🎨
+            Raw thoughts. Unfiltered creativity. {doodles.length} {doodles.length === 1 ? "doodle" : "doodles"} saved so far 🎨
           </p>
         </div>
 
         {/* Irregular Grid Layout */}
-        <div className="relative h-auto">
+        <div className="relative h-auto flex justify-center">
           <div
-            className="grid gap-6 sm:gap-8"
+            className="grid gap-4 sm:gap-5"
             style={{
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gridTemplateColumns: doodles.length === 1 
+                ? "1fr" 
+                : doodles.length === 2 
+                ? "repeat(2, 1fr)" 
+                : `repeat(auto-fit, minmax(${doodleSize}, 1fr))`,
+              maxWidth: doodles.length === 1 ? doodleSize : doodles.length === 2 ? `calc(${doodleSize} * 2 + 1rem)` : "100%",
             }}
           >
             {doodles.map((doodle, index) => {
@@ -75,8 +99,10 @@ export default function DoodlesGrid({ doodles }: { doodles: Doodle[] }) {
                 >
                   {/* Outer irregular container with rotation */}
                   <div
-                    className="relative w-full aspect-square transform transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl cursor-pointer"
+                    className="relative aspect-square transform transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl cursor-pointer"
                     style={{
+                      width: doodleSize,
+                      height: doodleSize,
                       transform: `rotate(${rotation})`,
                     }}
                   >
